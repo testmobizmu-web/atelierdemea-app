@@ -32,7 +32,7 @@ export default function CartDrawer() {
       const payload = {
         // later we’ll extend with address / name / phone
         items: items.map((item) => ({
-          product_id: item.productId,
+          product_id: item.id,        // ✅ use id from CartItem
           name: item.name,
           price: item.price,
           quantity: item.quantity,
@@ -74,7 +74,9 @@ export default function CartDrawer() {
       {/* overlay */}
       <div
         className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+          isOpen
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
         }`}
         onClick={closeCart}
       />
@@ -112,7 +114,7 @@ export default function CartDrawer() {
           ) : (
             items.map((item) => (
               <div
-                key={item.productId}
+                key={item.id} {/* ✅ use id as key */}
                 className="flex gap-3 rounded-2xl border border-[#fde7f1] bg-[#fff7fb] p-3"
               >
                 <div className="relative h-16 w-16 rounded-2xl overflow-hidden bg-[#fff1f7] border border-[#fde7f1] shrink-0">
@@ -144,7 +146,10 @@ export default function CartDrawer() {
                       <button
                         type="button"
                         onClick={() =>
-                          updateQuantity(item.productId, Math.max(1, item.quantity - 1))
+                          updateQuantity(
+                            item.id,                        // ✅ id
+                            Math.max(1, item.quantity - 1)
+                          )
                         }
                         className="px-2 py-1 rounded-l-full hover:bg-[#fff1f7]"
                       >
@@ -156,7 +161,7 @@ export default function CartDrawer() {
                       <button
                         type="button"
                         onClick={() =>
-                          updateQuantity(item.productId, item.quantity + 1)
+                          updateQuantity(item.id, item.quantity + 1) // ✅ id
                         }
                         className="px-2 py-1 rounded-r-full hover:bg-[#fff1f7]"
                       >
@@ -166,7 +171,7 @@ export default function CartDrawer() {
 
                     <button
                       type="button"
-                      onClick={() => removeItem(item.productId)}
+                      onClick={() => removeItem(item.id)} // ✅ id
                       className="text-[11px] text-[#b91c1c] hover:underline"
                     >
                       Remove
