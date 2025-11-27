@@ -1,23 +1,42 @@
-import { NextResponse } from "next/server";
-import { updateProduct } from "@/lib/products";
+// src/app/api/admin/products/[id]/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { updateProduct, ProductUpdateInput } from "@/lib/products";
 
+/**
+ * PUT /api/admin/products/[id]
+ * Body: partial product fields to update
+ */
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
-  const id = Number(params.id);
-  if (Number.isNaN(id)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
-
-  const body = await req.json();
-
   try {
-    const updated = await updateProduct(id, body);
+    const { id } = await context.params;
+
+    const body = (await req.json()) as ProductUpdateInput;
+
+    // You can restrict which fields are allowed here if you want:
+    const updates: ProductUpdateInput = {
+      name: body.name,
+      slug: body.slug,
+      price: body.price,
+      short_description: body.short_description,
+      long_description: body.long_description,
+      category: body.category,
+      color: body.color,
+      variant: body.variant,
+      stock: body.stock,
+      image_url: body.image_url,
+      is_featured: body.is_featured,
+    };
+
+    const updated = await updateProduct(id, updates);
+
     return NextResponse.json({ data: updated });
-  } catch (error: any) {
+  } catch (err: any) {
+    console.error("Admin update product error:", err);
     return NextResponse.json(
-      { error: error.message ?? "Failed to update product" },
+      { error: err?.message ?? "Error updating product" },
       { status: 500 }
     );
   }
