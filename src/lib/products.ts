@@ -87,28 +87,18 @@ export async function getProductBySlug(
 }
 
 // Get a single product by ID (used in admin edit page)
-export async function getProductById(
-  id: string
-): Promise<Product | null> {
+export async function getProductById(id: string): Promise<Product | null> {
   const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("id", id)
     .maybeSingle();
 
-  if (error) {
-    console.error("DEBUG getProductById – Supabase error:", error);
-    return null;
-  }
-
-  if (!data) return null;
+  if (error || !data) return null;
 
   return {
     ...data,
-    description:
-      (data as any).description ??
-      (data as any).short_description ??
-      null,
+    description: data.description ?? data.short_description ?? null,
   } as Product;
 }
 

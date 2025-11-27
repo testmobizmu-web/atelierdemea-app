@@ -3,18 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ProductImageUploader from "@/components/ProductImageUploader";
+import type { Product } from "@/lib/products";
 
-type Product = {
-  id: number;
-  name: string;
-  price: number;
-  description: string | null;
-  image_url: string | null;
-  is_featured?: boolean;
+type EditProductFormProps = {
+  product: Product;
 };
 
-export default function EditProductForm({ product }: { product: Product }) {
+export default function EditProductForm({ product }: EditProductFormProps) {
   const router = useRouter();
+
   const [form, setForm] = useState({
     name: product.name,
     price: product.price,
@@ -22,6 +19,7 @@ export default function EditProductForm({ product }: { product: Product }) {
     image_url: product.image_url ?? "",
     is_featured: !!product.is_featured,
   });
+
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,7 +56,9 @@ export default function EditProductForm({ product }: { product: Product }) {
       className="bg-[#fff7fb] border border-[#fde7f1] rounded-3xl p-5 sm:p-6 space-y-5"
     >
       <div className="grid gap-5 md:grid-cols-[2fr_1.2fr]">
+        {/* LEFT SIDE – TEXT FIELDS */}
         <div className="space-y-4">
+          {/* Name */}
           <div>
             <label className="block text-sm font-medium text-[#47201d] mb-1">
               Product name
@@ -66,12 +66,15 @@ export default function EditProductForm({ product }: { product: Product }) {
             <input
               type="text"
               value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, name: e.target.value }))
+              }
               className="w-full rounded-xl border border-[#f9a8d4] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ec4899]"
               required
             />
           </div>
 
+          {/* Price */}
           <div>
             <label className="block text-sm font-medium text-[#47201d] mb-1">
               Price (Rs)
@@ -82,13 +85,17 @@ export default function EditProductForm({ product }: { product: Product }) {
               step="1"
               value={form.price}
               onChange={(e) =>
-                setForm((f) => ({ ...f, price: Number(e.target.value) }))
+                setForm((f) => ({
+                  ...f,
+                  price: Number(e.target.value || 0),
+                }))
               }
               className="w-full rounded-xl border border-[#f9a8d4] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ec4899]"
               required
             />
           </div>
 
+          {/* Description */}
           <div>
             <label className="block text-sm font-medium text-[#47201d] mb-1">
               Description
@@ -104,6 +111,7 @@ export default function EditProductForm({ product }: { product: Product }) {
             />
           </div>
 
+          {/* Featured toggle */}
           <label className="inline-flex items-center gap-2 text-xs text-[#47201d]">
             <input
               type="checkbox"
@@ -117,6 +125,7 @@ export default function EditProductForm({ product }: { product: Product }) {
           </label>
         </div>
 
+        {/* RIGHT SIDE – IMAGE */}
         <div className="space-y-4">
           <ProductImageUploader
             label="Product image"
@@ -131,8 +140,10 @@ export default function EditProductForm({ product }: { product: Product }) {
         </div>
       </div>
 
+      {/* Error */}
       {error && <p className="text-xs text-red-500">{error}</p>}
 
+      {/* Actions */}
       <div className="flex flex-wrap justify-end gap-3 pt-2">
         <button
           type="button"
