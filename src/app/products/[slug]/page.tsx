@@ -212,10 +212,16 @@ export default async function ProductPage({
                 {description}
               </p>
 
-              {/* ✅ Cart + quantity controls (side cart + WhatsApp flow) */}
-              <div className="pt-2 border-t border-[#fde7f1] mt-2">
-                <AddToCartControls product={product} />
-              </div>
+             {/* ✅ Cart + quantity controls (side cart + WhatsApp flow) */}
+             <div className="pt-2 border-t border-[#fde7f1] mt-2">
+               <AddToCartControls
+                 productId={product.id}
+                 slug={product.slug}
+                 name={product.name}
+                 price={product.price}
+                  imageUrl={product.image_url}
+           />
+         </div>
 
               {/* Secondary actions */}
               <div className="pt-3 flex flex-wrap gap-3 text-[11px] sm:text-xs">
