@@ -14,7 +14,7 @@ export default async function EditProductPage({
   // ✅ Next 16: params is a Promise
   const { id } = await params;
 
-  // id is a string in your DB, so no Number() here
+  // id is a string in your DB, so pass directly
   const product = await getProductById(id);
 
   if (!product) {
@@ -40,8 +40,9 @@ export default async function EditProductPage({
         Update details for <strong>{product.name}</strong>.
       </p>
 
-      {/* Your existing form component that handles the actual editing */}
-      <EditProductForm initialProduct={product} />
+      {/* ✅ Pass the prop name expected by EditProductForm */}
+      <EditProductForm product={product} />
     </div>
   );
 }
+
