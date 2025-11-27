@@ -1,38 +1,47 @@
+// src/app/admin/products/[id]/edit/page.tsx
 import { getProductById } from "@/lib/products";
 import EditProductForm from "./EditProductForm";
+
+type PageParams = {
+  id: string;
+};
 
 export default async function EditProductPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<PageParams>;
 }) {
-  const id = Number(params.id);
+  // ✅ Next 16: params is a Promise
+  const { id } = await params;
+
+  // id is a string in your DB, so no Number() here
   const product = await getProductById(id);
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-[#47201d] text-sm">Product not found.</p>
+      <div>
+        <h1 className="text-xl font-semibold text-[#3B2A24]">
+          Product not found
+        </h1>
+        <p className="text-xs text-[#7A6058] mt-1">
+          We couldn&apos;t find any product with ID:{" "}
+          <span className="font-mono">{id}</span>
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-[#47201d]">
-              Edit product
-            </h1>
-            <p className="text-xs text-[#a36d63]">
-              Make changes and don’t forget to save.
-            </p>
-          </div>
-        </div>
+    <div>
+      <h1 className="text-xl font-semibold text-[#3B2A24] mb-1">
+        Edit product
+      </h1>
+      <p className="text-xs text-[#7A6058] mb-4">
+        Update details for <strong>{product.name}</strong>.
+      </p>
 
-        <EditProductForm product={product} />
-      </div>
+      {/* Your existing form component that handles the actual editing */}
+      <EditProductForm initialProduct={product} />
     </div>
   );
 }
