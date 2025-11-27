@@ -1,0 +1,2 @@
+/api/*  /.netlify/functions/next_api  200
+/*      /.netlify/functions/next_render  200
