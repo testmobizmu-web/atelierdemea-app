@@ -85,3 +85,62 @@ export async function getProductBySlug(
     sale_badge_label: data.sale_badge_label ?? null,
   } as Product;
 }
+
+// Get a single product by ID (used in admin edit page)
+export async function getProductById(
+  id: string
+): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("DEBUG getProductById – Supabase error:", error);
+    return null;
+  }
+
+  if (!data) return null;
+
+  return {
+    ...data,
+    description:
+      (data as any).description ??
+      (data as any).short_description ??
+      null,
+  } as Product;
+}
+
+// Fields that admin is allowed to update
+export type ProductUpdateInput = Partial<
+  Omit<Product, "id" | "created_at">
+>;
+
+// Update a product by ID (used by /api/admin/products/[id])
+export async function updateProduct(
+  id: string,
+  updates: ProductUpdateInput
+): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from("products")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    console.error("DEBUG updateProduct – Supabase error:", error);
+    throw error;
+  }
+
+  if (!data) return null;
+
+  return {
+    ...data,
+    description:
+      (data as any).description ??
+      (data as any).short_description ??
+      null,
+  } as Product;
+}
