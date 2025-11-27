@@ -5,12 +5,23 @@
 [build.environment]
   NODE_VERSION = "20.10.0"
 
-# 🔁 Force all routes to go through the Next.js runtime
+# Use the official Next.js plugin
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Force all API routes to the Next.js API function
+[[redirects]]
+  from = "/api/*"
+  to   = "/.netlify/functions/next_api"
+  status = 200
+  force  = true
+
+# Force every other route through the Next.js render function
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/___netlify-handler"
+  to   = "/.netlify/functions/next_render"
   status = 200
-
+  force  = true
 
 
 
