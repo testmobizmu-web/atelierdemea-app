@@ -5,4 +5,13 @@
 [build.environment]
   NODE_VERSION = "20.10.0"
 
+# 🔁 Force all routes to go through the Next.js runtime
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/___netlify-handler"
+  status = 200
+
+
+
+
 
