@@ -32,7 +32,7 @@ export default function CartDrawer() {
       const payload = {
         // later we’ll extend with address / name / phone
         items: items.map((item) => ({
-          product_id: item.id,        // ✅ use id from CartItem
+          product_id: item.id, // ✅ use id from CartItem
           name: item.name,
           price: item.price,
           quantity: item.quantity,
@@ -54,11 +54,9 @@ export default function CartDrawer() {
 
       const data = await res.json();
       if (data.whatsappUrl) {
-        // Open WhatsApp chat in new tab
         window.open(data.whatsappUrl, "_blank");
       }
 
-      // Optional: clear cart & close drawer
       clearCart();
       closeCart();
     } catch (err: any) {
@@ -114,7 +112,7 @@ export default function CartDrawer() {
           ) : (
             items.map((item) => (
               <div
-                key={item.id} {/* ✅ use id as key */}
+                key={item.id} // ✅ key uses id
                 className="flex gap-3 rounded-2xl border border-[#fde7f1] bg-[#fff7fb] p-3"
               >
                 <div className="relative h-16 w-16 rounded-2xl overflow-hidden bg-[#fff1f7] border border-[#fde7f1] shrink-0">
@@ -147,7 +145,7 @@ export default function CartDrawer() {
                         type="button"
                         onClick={() =>
                           updateQuantity(
-                            item.id,                        // ✅ id
+                            item.id,
                             Math.max(1, item.quantity - 1)
                           )
                         }
@@ -161,7 +159,7 @@ export default function CartDrawer() {
                       <button
                         type="button"
                         onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1) // ✅ id
+                          updateQuantity(item.id, item.quantity + 1)
                         }
                         className="px-2 py-1 rounded-r-full hover:bg-[#fff1f7]"
                       >
@@ -171,7 +169,7 @@ export default function CartDrawer() {
 
                     <button
                       type="button"
-                      onClick={() => removeItem(item.id)} // ✅ id
+                      onClick={() => removeItem(item.id)}
                       className="text-[11px] text-[#b91c1c] hover:underline"
                     >
                       Remove
@@ -215,4 +213,5 @@ export default function CartDrawer() {
     </>
   );
 }
+
 
