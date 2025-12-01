@@ -46,7 +46,7 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
             </button>
           </div>
 
-          {/* Center: tagline (hidden on very small screens if no space) */}
+          {/* Center: tagline */}
           <div className="hidden sm:block text-center flex-1 text-[11px]">
             Handmade with 💗 in Mauritius – Premium turbans, bags &amp; clothing
           </div>
@@ -103,49 +103,54 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
       {/* ============ MAIN NAV BAR ============ */}
       <div className="border-b border-[#fde7f1] bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-4">
-          {/* Logo + brand */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="relative h-10 w-32 sm:h-11 sm:w-36 overflow-hidden">
-              <Image
-                src={effectiveLogo}
-                alt={displayName}
-                fill
-                sizes="160px"
-                className="object-contain"
-                priority
-              />
-            </div>
-
-            <div className="leading-tight">
-              <div className="text-xs uppercase tracking-[0.25em] text-[#a36d63]">
-                {displayName}
+          {/* LEFT GROUP: logo + brand + nav (desktop) */}
+          <div className="flex items-center gap-6 flex-1 min-w-0">
+            {/* Logo + brand (always left) */}
+            <Link href="/" className="flex items-center gap-3 shrink-0">
+              {/* circular logo */}
+              <div className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full overflow-hidden border border-[#fde7f1] bg-[#fff1f7]">
+                <Image
+                  src={effectiveLogo}
+                  alt={displayName}
+                  fill
+                  sizes="40px"
+                  className="object-cover"
+                  priority
+                />
               </div>
-              <div className="text-[11px] text-[#a36d63]">
-                Handmade pieces · Mauritius
+
+              {/* brand text */}
+              <div className="leading-tight">
+                <div className="text-xs font-semibold tracking-[0.25em] text-[#a36d63] uppercase">
+                  {displayName}
+                </div>
+                <div className="text-[11px] text-[#a36d63]">
+                  Handmade pieces · Mauritius
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6 text-xs sm:text-sm">
-            <Link href="/" className="font-semibold text-[#e11d70]">
-              Home
-            </Link>
-            <Link href="/shop?sort=new" className="hover:text-[#e11d70]">
-              New Arrivals
-            </Link>
-            <Link href="/shop" className="hover:text-[#e11d70]">
-              Categories
-            </Link>
-            <Link href="/about" className="hover:text-[#e11d70]">
-              About Us
-            </Link>
-            <Link href="/support" className="hover:text-[#e11d70]">
-              Support
-            </Link>
-          </nav>
+            {/* Desktop nav – sits next to brand on the left */}
+            <nav className="hidden md:flex items-center gap-6 text-xs sm:text-sm">
+              <Link href="/" className="font-semibold text-[#e11d70]">
+                Home
+              </Link>
+              <Link href="/shop?sort=new" className="hover:text-[#e11d70]">
+                New Arrivals
+              </Link>
+              <Link href="/shop" className="hover:text-[#e11d70]">
+                Categories
+              </Link>
+              <Link href="/about" className="hover:text-[#e11d70]">
+                About Us
+              </Link>
+              <Link href="/support" className="hover:text-[#e11d70]">
+                Support
+              </Link>
+            </nav>
+          </div>
 
-          {/* Right actions (desktop) */}
+          {/* RIGHT ACTIONS (desktop) */}
           <div className="hidden sm:flex items-center gap-3 sm:gap-4">
             <Link
               href="/login"
@@ -170,7 +175,7 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
             </Link>
           </div>
 
-          {/* Mobile actions */}
+          {/* MOBILE ACTIONS */}
           <div className="flex items-center gap-2 sm:hidden">
             <Link
               href="/cart"
@@ -193,7 +198,7 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
           </div>
         </div>
 
-        {/* Mobile nav panel */}
+        {/* MOBILE NAV PANEL */}
         {menuOpen && (
           <div className="md:hidden border-t border-[#fde7f1] bg-white">
             <nav className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col gap-2 text-sm">
