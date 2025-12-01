@@ -11,25 +11,19 @@ export const revalidate = 0;
  * SEO metadata for the homepage
  */
 export const metadata: Metadata = {
-  title: "Atelier de Méa – Handmade Turbans, Clothing & Bags in Mauritius",
+  title:
+    "Atelier de Méa – Handmade Turbans, Clothing & Bags in Mauritius",
   description:
     "Feminine handmade turbans, outfits and bags crafted with love in Roche Bois, Mauritius. Cash on Delivery, Juice / Scan-to-Pay, fast dispatch and premium quality by Atelier de Méa.",
   openGraph: {
-    title: "Atelier de Méa – Handmade Turbans, Clothing & Bags in Mauritius",
+    title:
+      "Atelier de Méa – Handmade Turbans, Clothing & Bags in Mauritius",
     description:
       "Shop turbans, bandeaux, outfits and bags. Handmade in Mauritius with Cash on Delivery and Juice/Scan-to-Pay.",
     url: "https://atelierdemea.com",
     type: "website",
   },
 };
-
-// Local hero images (4 rectangles)
-const HERO_IMAGES = [
-  "/hero/hero1.jpg",
-  "/hero/hero2.jpg",
-  "/hero/hero3.jpg",
-  "/hero/hero4.jpg",
-];
 
 export default async function HomePage() {
   const [allProducts, settings] = await Promise.all([
@@ -40,19 +34,23 @@ export default async function HomePage() {
   // Sort helpers
   const byNewest = [...allProducts].sort(
     (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      new Date(b.created_at).getTime() -
+      new Date(a.created_at).getTime()
   );
 
   const newArrivals = byNewest.slice(0, 8);
 
-  const featuredProducts = (
-    allProducts.filter((p) => p.is_featured).length
-      ? allProducts.filter((p) => p.is_featured)
-      : allProducts
+  const featuredProducts = (allProducts.filter((p) => p.is_featured)
+    .length
+    ? allProducts.filter((p) => p.is_featured)
+    : allProducts
   ).slice(0, 8);
 
   const bestSellers = [...allProducts]
-    .sort((a, b) => (b.stock ?? 0) - (a.stock ?? 0))
+    .sort(
+      (a, b) =>
+        (b.stock ?? 0) - (a.stock ?? 0)
+    )
     .slice(0, 8);
 
   const blogPosts = [
@@ -66,7 +64,7 @@ export default async function HomePage() {
       title: "Behind the seams – how we handcraft each Méa piece",
       href: "/blog/atelier-behind-the-scenes",
       category: "Inside the Atelier",
-      image: "/blog/handcraft-each-mea-piece.png", // make sure you renamed the file
+      image: "/blog/handcraft-each-mea-piece.png",
     },
     {
       title: "Care guide: keep your turbans fresh & beautiful",
@@ -108,10 +106,14 @@ export default async function HomePage() {
 
   // Settings-driven hero content
   const heroTitle =
-    settings?.hero_title || "Feminine handmade pieces for everyday queens.";
+    settings?.hero_title ||
+    "Feminine handmade pieces for everyday queens.";
   const heroSubtitle =
     settings?.hero_subtitle ||
     "Atelier de Méa brings you premium handcrafted turbans, clothing and bags — designed with love in Roche Bois, Mauritius.";
+
+  const heroPrimaryImageUrl = settings?.hero_primary_image_url || null;
+  const heroSecondaryImageUrl = settings?.hero_secondary_image_url || null;
 
   return (
     <div className="min-h-screen bg-white text-[#47201d]">
@@ -155,23 +157,68 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Hero visual area – 4 local images */}
+          {/* Hero visual area */}
           <div className="grid grid-cols-2 gap-4 sm:gap-5">
-            {HERO_IMAGES.map((src, index) => (
-              <div
-                key={src}
-                className="relative h-32 sm:h-40 lg:h-44 rounded-3xl overflow-hidden border border-[#fde7f1] bg-[#fff1f7] shadow-lg"
-              >
-                <Image
-                  src={src}
-                  alt={`Atelier de Méa hero visual ${index + 1}`}
-                  fill
-                  priority={index === 0}
-                  sizes="(min-width: 1024px) 260px, 45vw"
-                  className="object-cover"
-                />
-              </div>
-            ))}
+            {heroPrimaryImageUrl || heroSecondaryImageUrl ? (
+              <>
+                {/* Main photo from settings */}
+                <div className="relative col-span-2 sm:col-span-1 h-40 sm:h-52 lg:h-60 rounded-3xl overflow-hidden border border-[#fde7f1] bg-[#fff1f7] shadow-lg">
+                  {heroPrimaryImageUrl ? (
+                    <Image
+                      src={heroPrimaryImageUrl}
+                      alt="Atelier de Méa hero"
+                      fill
+                      sizes="(min-width: 1024px) 340px, 50vw"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-[#e5a4bc]">
+                      Hero image
+                    </div>
+                  )}
+                </div>
+
+                {/* Secondary photo from settings */}
+                <div className="relative h-32 sm:h-40 lg:h-44 rounded-3xl overflow-hidden border border-[#fde7f1] bg-[#fff1f7] shadow-md">
+                  {heroSecondaryImageUrl ? (
+                    <Image
+                      src={heroSecondaryImageUrl}
+                      alt="Atelier de Méa hero secondary"
+                      fill
+                      sizes="(min-width: 1024px) 260px, 40vw"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[11px] text-[#e5a4bc]">
+                      Secondary image
+                    </div>
+                  )}
+                </div>
+
+                {/* Decorative gradient block */}
+                <div className="rounded-3xl bg-gradient-to-br from-[#f9a8d4] via-white to-[#fecaca] shadow-lg h-32 sm:h-40 lg:h-44" />
+              </>
+            ) : (
+              <>
+                {/* Fallback: 4 static hero images from /public/hero */}
+                {["/hero/hero1.jpg", "/hero/hero2.jpg", "/hero/hero3.jpg", "/hero/hero4.jpg"].map(
+                  (src, index) => (
+                    <div
+                      key={src}
+                      className="relative h-32 sm:h-40 lg:h-44 rounded-3xl overflow-hidden bg-[#fff1f7] border border-[#fde7f1] shadow-lg"
+                    >
+                      <Image
+                        src={src}
+                        alt={`Atelier de Méa hero visual ${index + 1}`}
+                        fill
+                        priority={index === 0}
+                        className="object-cover"
+                      />
+                    </div>
+                  )
+                )}
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -179,12 +226,18 @@ export default async function HomePage() {
       {/* ============ USP STRIP ============ */}
       <section className="border-t border-b border-[#fde7f1] bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-[11px] sm:text-xs text-[#a36d63]">
-          <Usp title="Cash on Delivery">Pay on delivery in Mauritius.</Usp>
-          <Usp title="Fast Dispatch">Orders prepared within 24–48h.</Usp>
+          <Usp title="Cash on Delivery">
+            Pay on delivery in Mauritius.
+          </Usp>
+          <Usp title="Fast Dispatch">
+            Orders prepared within 24–48h.
+          </Usp>
           <Usp title="Handmade Quality">
             Carefully crafted in small batches.
           </Usp>
-          <Usp title="Mauritius Based">Roche Bois, Port-Louis.</Usp>
+          <Usp title="Mauritius Based">
+            Roche Bois, Port-Louis.
+          </Usp>
         </div>
       </section>
 
@@ -249,7 +302,6 @@ export default async function HomePage() {
                     src={post.image}
                     alt={post.title}
                     fill
-                    sizes="(min-width: 1024px) 260px, 50vw"
                     className="object-cover"
                   />
                 </div>
@@ -282,7 +334,8 @@ export default async function HomePage() {
                 Loved by our queens
               </h2>
               <p className="text-xs sm:text-sm text-[#a36d63]">
-                Scroll through what our customers say and leave your own review.
+                Scroll through what our customers say and leave your own
+                review.
               </p>
             </div>
           </div>
@@ -320,7 +373,9 @@ export default async function HomePage() {
                     {review.name.charAt(0)}
                   </div>
                   <div>
-                    <div className="text-sm font-semibold">{review.name}</div>
+                    <div className="text-sm font-semibold">
+                      {review.name}
+                    </div>
                     <div className="text-[11px] text-[#a36d63]">
                       Verified customer
                     </div>
@@ -426,8 +481,8 @@ export default async function HomePage() {
                 Submit review
               </button>
               <p className="text-[10px] sm:text-[11px] text-[#a36d63]">
-                By submitting, you agree that your review may be published on
-                this website. We only show your first name.
+                By submitting, you agree that your review may be published
+                on this website. We only show your first name.
               </p>
             </div>
           </form>
@@ -442,8 +497,8 @@ export default async function HomePage() {
               Atelier de Méa
             </h3>
             <p className="max-w-xs">
-              Handmade turbans, clothing and bags crafted with love in Roche
-              Bois, Mauritius.
+              Handmade turbans, clothing and bags crafted with love in
+              Roche Bois, Mauritius.
             </p>
           </div>
 
@@ -505,7 +560,10 @@ export default async function HomePage() {
                 </Link>
               </li>
               <li>
-                <Link href="/policies/terms" className="hover:text-[#e11d70]">
+                <Link
+                  href="/policies/terms"
+                  className="hover:text-[#e11d70]"
+                >
                   Terms &amp; Conditions
                 </Link>
               </li>
@@ -542,12 +600,18 @@ export default async function HomePage() {
         {/* Payment badges */}
         <div className="border-t border-[#fde7f1] bg-[#fff7fb]">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 flex flex-wrap items-center gap-3 text-[11px] sm:text-xs text-[#a36d63]">
-            <span className="font-semibold mr-1">Secure payments:</span>
+            <span className="font-semibold mr-1">
+              Secure payments:
+            </span>
             <Badge className="bg-white border-[#e5e7eb]">
               Visa / Mastercard
             </Badge>
-            <Badge className="bg-white border-[#e5e7eb]">Juice by MCB</Badge>
-            <Badge className="bg-white border-[#e5e7eb]">Scan-to-Pay</Badge>
+            <Badge className="bg-white border-[#e5e7eb]">
+              Juice by MCB
+            </Badge>
+            <Badge className="bg-white border-[#e5e7eb]">
+              Scan-to-Pay
+            </Badge>
             <Badge className="bg-white border-[#e5e7eb]">
               Cash on Delivery
             </Badge>
@@ -558,7 +622,8 @@ export default async function HomePage() {
         <div className="bg-[#be185d] text-white text-[11px] sm:text-xs">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2">
             <span>
-              © {new Date().getFullYear()} Atelier de Méa. All rights reserved.
+              © {new Date().getFullYear()} Atelier de Méa. All
+              rights reserved.
             </span>
             <span>
               Website built by{" "}
@@ -632,9 +697,13 @@ function SectionWrapper({
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-10 sm:py-12">
         <div className="flex flex-wrap items-end justify-between gap-3 mb-6">
           <div>
-            <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">
+              {title}
+            </h2>
             {subtitle && (
-              <p className="text-xs sm:text-sm text-[#a36d63]">{subtitle}</p>
+              <p className="text-xs sm:text-sm text-[#a36d63]">
+                {subtitle}
+              </p>
             )}
           </div>
           {actionLabel && actionHref && (
@@ -734,4 +803,5 @@ function ProductGrid({ products }: { products: Product[] }) {
     </div>
   );
 }
+
 
