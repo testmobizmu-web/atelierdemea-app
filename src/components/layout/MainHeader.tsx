@@ -19,29 +19,19 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
 
   return (
     <header className="sticky top-0 z-30">
-      {/* ============ TOP PINK STRIP ============ */}
+      {/* ============ TOP PINK STRIP (LANG + TAGLINE + SOCIAL) ============ */}
       <div className="bg-[#be185d] text-white text-[10px] sm:text-[11px]">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-1.5 flex items-center justify-between gap-3">
           {/* Left: language flags */}
           <div className="flex items-center gap-2">
             <span className="font-semibold">LANG :</span>
             <button className="flex items-center gap-1 hover:opacity-90">
-              <Image
-                src="/flags/en.png"
-                alt="English"
-                width={14}
-                height={14}
-              />
+              <Image src="/flags/en.png" alt="English" width={14} height={14} />
               <span>EN</span>
             </button>
             <span className="text-white/40 text-xs">/</span>
             <button className="flex items-center gap-1 hover:opacity-90">
-              <Image
-                src="/flags/fr.png"
-                alt="Français"
-                width={14}
-                height={14}
-              />
+              <Image src="/flags/fr.png" alt="Français" width={14} height={14} />
               <span>FR</span>
             </button>
           </div>
@@ -102,26 +92,24 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
 
       {/* ============ MAIN NAV BAR ============ */}
       <div className="border-b border-[#fde7f1] bg-white">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-4">
-          {/* LEFT GROUP: logo + brand + nav (desktop) */}
-          <div className="flex items-center gap-6 flex-1 min-w-0">
-            {/* Logo + brand (always left) */}
-            <Link href="/" className="flex items-center gap-3 shrink-0">
-              {/* circular logo */}
-              <div className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full overflow-hidden border border-[#fde7f1] bg-[#fff1f7]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          {/* ---------- DESKTOP LAYOUT (logo left, nav centered, actions right) ---------- */}
+          <div className="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-4">
+            {/* Logo + brand (LEFT) */}
+            <Link href="/" className="flex items-center gap-3">
+              <div className="relative h-10 w-10 sm:h-11 sm:w-11 rounded-full overflow-hidden">
                 <Image
                   src={effectiveLogo}
                   alt={displayName}
                   fill
-                  sizes="40px"
+                  sizes="44px"
                   className="object-cover"
                   priority
                 />
               </div>
 
-              {/* brand text */}
               <div className="leading-tight">
-                <div className="text-xs font-semibold tracking-[0.25em] text-[#a36d63] uppercase">
+                <div className="text-xs uppercase tracking-[0.25em] text-[#a36d63]">
                   {displayName}
                 </div>
                 <div className="text-[11px] text-[#a36d63]">
@@ -130,8 +118,8 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
               </div>
             </Link>
 
-            {/* Desktop nav – sits next to brand on the left */}
-            <nav className="hidden md:flex items-center gap-6 text-xs sm:text-sm">
+            {/* Menu centered (CENTER) */}
+            <nav className="flex justify-center gap-6 text-xs sm:text-sm">
               <Link href="/" className="font-semibold text-[#e11d70]">
                 Home
               </Link>
@@ -148,57 +136,82 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
                 Support
               </Link>
             </nav>
+
+            {/* Actions (RIGHT) */}
+            <div className="flex items-center justify-end gap-3 sm:gap-4">
+              <Link
+                href="/login"
+                className="text-[11px] sm:text-xs hover:text-[#e11d70]"
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center rounded-full border border-[#f9a8d4] px-3 py-1.5 text-[11px] sm:text-xs font-medium text-[#47201d] hover:bg-[#fff1f7] transition"
+              >
+                Sign up
+              </Link>
+
+              <Link
+                href="/cart"
+                aria-label="Cart"
+                className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#fde7f1] hover:bg-[#fff1f7] transition"
+              >
+                <span className="sr-only">Cart</span>
+                <span className="text-lg">🛒</span>
+              </Link>
+            </div>
           </div>
 
-          {/* RIGHT ACTIONS (desktop) */}
-          <div className="hidden sm:flex items-center gap-3 sm:gap-4">
-            <Link
-              href="/login"
-              className="text-[11px] sm:text-xs hover:text-[#e11d70]"
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex items-center justify-center rounded-full border border-[#f9a8d4] px-3 py-1.5 text-[11px] sm:text-xs font-medium text-[#47201d] hover:bg-[#fff1f7] transition"
-            >
-              Sign up
-            </Link>
-
-            <Link
-              href="/cart"
-              aria-label="Cart"
-              className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#fde7f1] hover:bg-[#fff1f7] transition"
-            >
-              <span className="sr-only">Cart</span>
-              <span className="text-lg">🛒</span>
-            </Link>
-          </div>
-
-          {/* MOBILE ACTIONS */}
-          <div className="flex items-center gap-2 sm:hidden">
-            <Link
-              href="/cart"
-              aria-label="Cart"
-              className="relative inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#fde7f1] hover:bg-[#fff1f7] transition"
-            >
-              <span className="sr-only">Cart</span>
-              <span className="text-base">🛒</span>
+          {/* ---------- MOBILE LAYOUT ---------- */}
+          <div className="flex md:hidden items-center justify-between gap-3">
+            {/* Logo + brand on mobile (LEFT) */}
+            <Link href="/" className="flex items-center gap-2">
+              <div className="relative h-9 w-9 rounded-full overflow-hidden">
+                <Image
+                  src={effectiveLogo}
+                  alt={displayName}
+                  fill
+                  sizes="36px"
+                  className="object-cover"
+                  priority
+                />
+              </div>
+              <div className="leading-tight">
+                <div className="text-[11px] uppercase tracking-[0.18em] text-[#a36d63]">
+                  {displayName}
+                </div>
+                <div className="text-[10px] text-[#a36d63]">
+                  Handmade pieces · Mauritius
+                </div>
+              </div>
             </Link>
 
-            <button
-              type="button"
-              onClick={() => setMenuOpen((v) => !v)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#fde7f1] hover:bg-[#fff1f7] transition"
-              aria-label="Toggle menu"
-            >
-              <span className="sr-only">Toggle menu</span>
-              <span className="text-lg">{menuOpen ? "✕" : "☰"}</span>
-            </button>
+            {/* Right: cart + hamburger */}
+            <div className="flex items-center gap-2">
+              <Link
+                href="/cart"
+                aria-label="Cart"
+                className="relative inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#fde7f1] hover:bg-[#fff1f7] transition"
+              >
+                <span className="sr-only">Cart</span>
+                <span className="text-base">🛒</span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#fde7f1] hover:bg-[#fff1f7] transition"
+                aria-label="Toggle menu"
+              >
+                <span className="sr-only">Toggle menu</span>
+                <span className="text-lg">{menuOpen ? "✕" : "☰"}</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* MOBILE NAV PANEL */}
+        {/* Mobile slide-down menu */}
         {menuOpen && (
           <div className="md:hidden border-t border-[#fde7f1] bg-white">
             <nav className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col gap-2 text-sm">
@@ -239,4 +252,5 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
     </header>
   );
 }
+
 
