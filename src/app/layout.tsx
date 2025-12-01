@@ -7,7 +7,8 @@ import { CartProvider } from "@/components/cart/CartContext";
 import CartDrawer from "@/components/cart/CartDrawer";
 import FloatingWhatsApp from "@/components/layout/FloatingWhatsApp";
 import ScrollToTop from "@/components/layout/ScrollToTop";
-import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
+// ❌ REMOVE this import
+// import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { MainHeader } from "@/components/layout/MainHeader";
 import { getShopSettings } from "@/lib/settings";
 
@@ -32,17 +33,16 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      {/* Dynamic favicon based on settings */}
       <head>
         <link rel="icon" href={faviconUrl} />
       </head>
       <body className={`${inter.className} bg-white text-[#47201d]`}>
         <CartProvider>
           <div className="min-h-screen flex flex-col">
-            {/* Top announcement bar */}
-            <AnnouncementBar />
+            {/* ❌ REMOVE AnnouncementBar here */}
+            {/* <AnnouncementBar /> */}
 
-            {/* Main header (logo + menu + login + cart) */}
+            {/* Main header (now includes the pink strip + socials) */}
             <MainHeader logoUrl={logoUrl} siteName={siteName} />
 
             {/* Page content */}
@@ -58,3 +58,4 @@ export default async function RootLayout({
     </html>
   );
 }
+
