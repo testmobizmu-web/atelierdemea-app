@@ -4,6 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { useLanguage } from "@/components/layout/LanguageSwitcher";
 
 type MainHeaderProps = {
   logoUrl?: string | null;
@@ -13,9 +14,18 @@ type MainHeaderProps = {
 export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const { lang, setLang } = useLanguage();
+
   const displayName = siteName || "Atelier de Méa";
   // Fallback to local logo
   const effectiveLogo = logoUrl || "/logo/logo.png";
+
+  const tagline =
+    lang === "en"
+      ? "Handmade with 💗 in Mauritius – Premium turbans, bags & clothing"
+      : "Fait main avec 💗 à Maurice – Turbans, sacs & vêtements premium";
+
+  const followLabel = lang === "en" ? "Follow us:" : "Suivez-nous :";
 
   return (
     <header className="sticky top-0 z-30">
@@ -25,25 +35,53 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
           {/* Left: language flags */}
           <div className="flex items-center gap-2">
             <span className="font-semibold">LANG :</span>
-            <button className="flex items-center gap-1 hover:opacity-90">
-              <Image src="/flags/en.png" alt="English" width={14} height={14} />
+            <button
+              type="button"
+              onClick={() => setLang("en")}
+              className={`flex items-center gap-1 px-1 py-[2px] rounded-full transition ${
+                lang === "en"
+                  ? "bg-white/90 text-[#be185d]"
+                  : "text-white/80 hover:bg-white/10"
+              }`}
+            >
+              <Image
+                src="/flags/en.png"
+                alt="English"
+                width={14}
+                height={14}
+              />
               <span>EN</span>
             </button>
             <span className="text-white/40 text-xs">/</span>
-            <button className="flex items-center gap-1 hover:opacity-90">
-              <Image src="/flags/fr.png" alt="Français" width={14} height={14} />
+            <button
+              type="button"
+              onClick={() => setLang("fr")}
+              className={`flex items-center gap-1 px-1 py-[2px] rounded-full transition ${
+                lang === "fr"
+                  ? "bg-white/90 text-[#be185d]"
+                  : "text-white/80 hover:bg-white/10"
+              }`}
+            >
+              <Image
+                src="/flags/fr.png"
+                alt="Français"
+                width={14}
+                height={14}
+              />
               <span>FR</span>
             </button>
           </div>
 
-          {/* Center: tagline */}
+          {/* Center: tagline (switches EN/FR) */}
           <div className="hidden sm:block text-center flex-1 text-[11px]">
-            Handmade with 💗 in Mauritius – Premium turbans, bags &amp; clothing
+            {tagline}
           </div>
 
-          {/* Right: Follow us + social icons */}
+          {/* Right: Follow us + social icons (label switches EN/FR) */}
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline text-white/90">Follow us:</span>
+            <span className="hidden sm:inline text-white/90">
+              {followLabel}
+            </span>
 
             <Link
               href="https://facebook.com"

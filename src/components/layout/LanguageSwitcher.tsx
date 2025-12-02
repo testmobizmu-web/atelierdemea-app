@@ -1,28 +1,69 @@
+
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react";
 
 type Lang = "en" | "fr";
 
+type LanguageContextType = {
+  lang: Lang;
+  setLang: (value: Lang) => void;
+};
+
 const STORAGE_KEY = "atelierdemea_lang";
 
-export default function LanguageSwitcher() {
-  const [lang, setLang] = useState<Lang>("en");
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
 
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [lang, setLangState] = useState<Lang>("en");
+
+  // Load from localStorage on first mount
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = window.localStorage.getItem(STORAGE_KEY) as Lang | null;
     if (saved === "en" || saved === "fr") {
-      setLang(saved);
+      setLangState(saved);
     }
   }, []);
 
-  const changeLang = (value: Lang) => {
-    setLang(value);
+  const setLang = (value: Lang) => {
+    setLangState(value);
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_KEY, value);
     }
-    // Later we can hook this into full i18n
+  };
+
+  return (
+    <LanguageContext.Provider value={{ lang, setLang }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const ctx = useContext(LanguageContext);
+  if (!ctx) {
+    throw new Error("useLanguage must be used within LanguageProvider");
+  }
+  return ctx;
+}
+
+/**
+ * Small EN/FR toggle pill with flags
+ */
+export default function LanguageSwitcher() {
+  const { lang, setLang } = useLanguage();
+
+  const changeLang = (value: Lang) => {
+    setLang(value);
   };
 
   return (

@@ -7,10 +7,11 @@ import { CartProvider } from "@/components/cart/CartContext";
 import CartDrawer from "@/components/cart/CartDrawer";
 import FloatingWhatsApp from "@/components/layout/FloatingWhatsApp";
 import ScrollToTop from "@/components/layout/ScrollToTop";
-// ❌ REMOVE this import
-// import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { MainHeader } from "@/components/layout/MainHeader";
 import { getShopSettings } from "@/lib/settings";
+
+// ✅ import LanguageProvider from your LanguageSwitcher file
+import { LanguageProvider } from "@/components/layout/LanguageSwitcher";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,23 +38,23 @@ export default async function RootLayout({
         <link rel="icon" href={faviconUrl} />
       </head>
       <body className={`${inter.className} bg-white text-[#47201d]`}>
-        <CartProvider>
-          <div className="min-h-screen flex flex-col">
-            {/* ❌ REMOVE AnnouncementBar here */}
-            {/* <AnnouncementBar /> */}
+        {/* ✅ Make language available everywhere */}
+        <LanguageProvider>
+          <CartProvider>
+            <div className="min-h-screen flex flex-col">
+              {/* Announcement bar is now inside MainHeader (with language switch) */}
+              <MainHeader logoUrl={logoUrl} siteName={siteName} />
 
-            {/* Main header (now includes the pink strip + socials) */}
-            <MainHeader logoUrl={logoUrl} siteName={siteName} />
+              {/* Page content */}
+              <main className="flex-1">{children}</main>
 
-            {/* Page content */}
-            <main className="flex-1">{children}</main>
-
-            {/* Global UI */}
-            <CartDrawer />
-            <FloatingWhatsApp />
-            <ScrollToTop />
-          </div>
-        </CartProvider>
+              {/* Global UI */}
+              <CartDrawer />
+              <FloatingWhatsApp />
+              <ScrollToTop />
+            </div>
+          </CartProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
