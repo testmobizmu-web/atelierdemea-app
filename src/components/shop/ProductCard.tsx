@@ -19,7 +19,7 @@ export default function ProductCard({ product }: Props) {
     product.stock !== null && product.stock !== undefined && product.stock <= 0;
 
   return (
-    <article className="relative flex flex-col rounded-3xl border border-[#fde7f1] bg-white shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+    <article className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-[#fde7f1] bg-white shadow-sm transition-shadow hover:shadow-md">
       {/* Soft animated pink orb in the card background */}
       <div
         aria-hidden="true"
@@ -28,46 +28,48 @@ export default function ProductCard({ product }: Props) {
                    animate-[atelier-pulse_7s_ease-in-out_infinite]"
       />
 
-      {/* Actual card content */}
-      <div className="relative flex flex-col h-full">
-        <Link
-          href={`/products/${product.slug}`}
-          className="relative block w-full aspect-[4/5] bg-[#fff1f7]"
-        >
-          {product.image_url ? (
-            <Image
-              src={product.image_url}
-              alt={product.name}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-[10px] text-[#e5a4bc]">
-              No image
-            </div>
-          )}
+      {/* IMAGE AREA – now 1:1 */}
+      <Link
+        href={`/products/${product.slug}`}
+        className="relative block w-full aspect-square bg-[#fff1f7]"
+      >
+        {product.image_url ? (
+          <Image
+            src={product.image_url}
+            alt={product.name}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-[10px] text-[#e5a4bc]">
+            No image
+          </div>
+        )}
 
-          {product.is_featured && (
-            <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-[#e11d70] shadow-sm">
-              Featured
-            </span>
-          )}
+        {product.is_featured && (
+          <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-[#e11d70] shadow-sm">
+            Featured
+          </span>
+        )}
 
-          {isSoldOut && (
-            <span className="absolute right-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-semibold text-white">
-              Sold out
-            </span>
-          )}
-        </Link>
+        {isSoldOut && (
+          <span className="absolute right-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-semibold text-white">
+            Sold out
+          </span>
+        )}
+      </Link>
 
-        <div className="flex flex-1 flex-col px-3 pt-3 pb-3 sm:px-4 sm:pt-4 sm:pb-4">
+      {/* CONTENT AREA */}
+      <div className="relative flex flex-1 flex-col px-3 pt-3 pb-3 sm:px-4 sm:pt-4 sm:pb-4">
+        <div className="flex flex-1 flex-col">
           <Link href={`/products/${product.slug}`}>
             <h3 className="text-xs sm:text-sm font-semibold text-[#47201d] line-clamp-2">
               {product.name}
             </h3>
           </Link>
 
-          <p className="mt-1 text-[11px] sm:text-xs text-[#a36d63] line-clamp-2">
+          {/* fixed-height block so bottoms align better */}
+          <p className="mt-1 min-h-[34px] sm:min-h-[40px] text-[11px] sm:text-xs text-[#a36d63] line-clamp-2">
             {description}
           </p>
 
@@ -82,7 +84,8 @@ export default function ProductCard({ product }: Props) {
             )}
           </div>
 
-          <div className="mt-3">
+          {/* This pushes the controls to the bottom on all cards */}
+          <div className="mt-3 mt-auto">
             <AddToCartControls
               productId={product.id}
               slug={product.slug}

@@ -733,75 +733,101 @@ function ProductGrid({ products }: { products: Product[] }) {
   }
 
   return (
-    <div className="grid gap-5 sm:gap-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-      {products.map((product) => (
-        <article
-          key={product.id}
-          className="flex flex-col bg-white rounded-3xl border border-[#fde7f1] shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-        >
-          <div className="relative w-full aspect-[4/5] bg-[#fff1f7]">
-            {product.image_url ? (
-              <Image
-                src={product.image_url}
-                alt={product.name}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-[10px] text-[#e5a4bc]">
-                No image
+    <div className="grid gap-5 sm:gap-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 items-stretch">
+      {products.map((product) => {
+        const isSoldOut =
+          product.stock !== null &&
+          product.stock !== undefined &&
+          product.stock <= 0;
+
+        const description =
+          product.short_description ||
+          product.long_description ||
+          "Handmade piece by Atelier de Méa.";
+
+        return (
+          <article
+            key={product.id}
+            className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-[#fde7f1] bg-white shadow-sm transition-shadow hover:shadow-md"
+          >
+            {/* soft pink orb in background */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-10 -bottom-10 h-32 w-32 rounded-full
+                         bg-pink-100/80 blur-3xl opacity-60
+                         animate-[atelier-pulse_7s_ease-in-out_infinite]"
+            />
+
+            <div className="relative flex h-full flex-col">
+              {/* IMAGE — now 1:1 square */}
+              <Link
+                href={`/products/${product.slug}`}
+                className="relative block w-full aspect-square bg-[#fff1f7]"
+              >
+                {product.image_url ? (
+                  <Image
+                    src={product.image_url}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-[10px] text-[#e5a4bc]">
+                    No image
+                  </div>
+                )}
+
+                {product.is_featured && (
+                  <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-[#e11d70] shadow-sm">
+                    Featured
+                  </span>
+                )}
+                {isSoldOut && (
+                  <span className="absolute right-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-semibold text-white">
+                    Sold out
+                  </span>
+                )}
+              </Link>
+
+              {/* TEXT + CONTROLS */}
+              <div className="flex flex-1 flex-col px-3 pt-3 pb-3 sm:px-4 sm:pt-4 sm:pb-4">
+                <Link href={`/products/${product.slug}`}>
+                  <h3 className="text-xs sm:text-sm font-semibold text-[#47201d] line-clamp-2">
+                    {product.name}
+                  </h3>
+                </Link>
+
+                {/* fixed height so bottoms align */}
+                <p className="mt-1 min-h-[34px] sm:min-h-[40px] text-[11px] sm:text-xs text-[#a36d63] line-clamp-2">
+                  {description}
+                </p>
+
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="text-sm sm:text-base font-semibold text-[#e11d70]">
+                    Rs {product.price}
+                  </div>
+                  {product.category && (
+                    <span className="rounded-full bg-[#fff1f7] px-2 py-1 text-[10px] text-[#a36d63]">
+                      {product.category}
+                    </span>
+                  )}
+                </div>
+
+                {/* pushes controls to bottom so all cards align */}
+                <div className="mt-3 mt-auto">
+                  <AddToCartControls
+                    productId={product.id}
+                    slug={product.slug}
+                    name={product.name}
+                    price={product.price}
+                    imageUrl={product.image_url}
+                  />
+                </div>
               </div>
-            )}
-
-            {product.is_featured && (
-              <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold text-[#e11d70] shadow-sm">
-                Featured
-              </span>
-            )}
-            {product.stock !== null &&
-              product.stock !== undefined &&
-              product.stock <= 0 && (
-                <span className="absolute right-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-semibold text-white">
-                  Sold out
-                </span>
-              )}
-          </div>
-
-          <div className="flex flex-col flex-1 px-3 pt-3 pb-3 sm:px-4 sm:pt-4 sm:pb-4">
-            <h3 className="text-xs sm:text-sm font-semibold text-[#47201d] line-clamp-2">
-              {product.name}
-            </h3>
-            <p className="mt-1 text-[11px] sm:text-xs text-[#a36d63] line-clamp-2">
-              {product.short_description ||
-                product.long_description ||
-                "Handmade piece by Atelier de Méa."}
-            </p>
-
-            <div className="mt-3 flex items-center justify-between">
-              <div className="text-sm sm:text-base font-semibold text-[#e11d70]">
-                Rs {product.price}
-              </div>
-              {product.category && (
-                <span className="text-[10px] px-2 py-1 rounded-full bg-[#fff1f7] text-[#a36d63]">
-                  {product.category}
-                </span>
-              )}
             </div>
-
-            <div className="mt-3">
-              <AddToCartControls
-                productId={product.id}
-                slug={product.slug}
-                name={product.name}
-                price={product.price}
-                imageUrl={product.image_url}
-              />
-            </div>
-          </div>
-        </article>
-      ))}
+          </article>
+        );
+      })}
     </div>
   );
 }
-
-
