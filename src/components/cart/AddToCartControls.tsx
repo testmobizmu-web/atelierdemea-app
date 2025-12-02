@@ -38,43 +38,22 @@ export function AddToCartControls({
   };
 
   return (
-    <div className="flex items-center gap-2">
-      {/* Quantity pill */}
-      <div className="inline-flex items-center rounded-full border border-pink-200 bg-white px-1">
-        <button
-          type="button"
-          className="px-2 text-xs sm:text-sm text-[#a36d63]"
-          onClick={dec}
-        >
-          –
-        </button>
-        <span className="px-2 text-[11px] sm:text-xs font-medium text-[#47201d]">
-          {qty}
-        </span>
-        <button
-          type="button"
-          className="px-2 text-xs sm:text-sm text-[#a36d63]"
-          onClick={inc}
-        >
-          +
-        </button>
-      </div>
-
-      {/* Add-to-cart icon button */}
+    <div className="mt-3 flex items-center justify-between">
+      {/* LEFT: icon-only add-to-cart */}
       <button
         type="button"
         onClick={handleAdd}
         aria-label="Add to cart"
-        className="flex-1 inline-flex items-center justify-center rounded-full bg-[#ec4899] px-3 py-2 shadow-sm shadow-pink-200
-                   hover:bg-[#db2777] active:scale-[0.97] transition-all"
+        className="p-1.5 sm:p-2 text-black/80 hover:text-black transition-colors
+                   hover:scale-[1.03] active:scale-[0.97]"
       >
         <svg
           aria-hidden="true"
-          className="h-4 w-4 sm:h-5 sm:w-5 text-white"
           viewBox="0 0 24 24"
+          className="h-5 w-5"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.8"
+          strokeWidth="1.7"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
@@ -83,6 +62,25 @@ export function AddToCartControls({
           <path d="M3 3h2l2.4 12.3a1 1 0 0 0 1 .8h11.2a1 1 0 0 0 1-.8L22 7H7" />
         </svg>
       </button>
+
+      {/* RIGHT: quantity pill, keeping your soft atelier style */}
+      <div className="inline-flex items-center rounded-full border border-pink-100 bg-white px-2 text-xs sm:text-[13px] text-[#47201d]">
+        <button
+          type="button"
+          onClick={dec}
+          className="px-1.5 text-xs text-[#a36d63]"
+        >
+          –
+        </button>
+        <span className="px-2 font-medium">{qty}</span>
+        <button
+          type="button"
+          onClick={inc}
+          className="px-1.5 text-xs text-[#a36d63]"
+        >
+          +
+        </button>
+      </div>
     </div>
   );
 }
