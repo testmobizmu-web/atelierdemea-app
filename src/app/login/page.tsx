@@ -2,19 +2,47 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
-    // TODO: connect to your backend login logic
-    setTimeout(() => {
-      alert("Login demo — hook with real backend");
+    const formData = new FormData(e.currentTarget);
+    const email = String(formData.get("email"));
+    const password = String(formData.get("password"));
+
+    const supabase = getSupabaseBrowserClient();
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
       setLoading(false);
-    }, 1000);
+      return;
+    }
+
+    // You can redirect or reload
+    window.location.href = "/";
+  };
+
+  const handleGoogleLogin = async () => {
+    const supabase = getSupabaseBrowserClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
+    });
+    if (error) setError(error.message);
   };
 
   return (
@@ -25,10 +53,17 @@ export default function LoginPage() {
           Welcome back to Atelier de Méa 💗
         </p>
 
+        {error && (
+          <div className="mb-3 rounded-2xl bg-red-50 border border-red-200 px-3 py-2 text-[11px] text-red-700">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleLogin} className="flex flex-col gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-[11px] font-medium">Email</label>
             <input
+              name="email"
               type="email"
               required
               className="rounded-full border border-[#f9a8d4] px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-[#f9a8d4]"
@@ -38,6 +73,7 @@ export default function LoginPage() {
           <div className="flex flex-col gap-1">
             <label className="text-[11px] font-medium">Password</label>
             <input
+              name="password"
               type="password"
               required
               className="rounded-full border border-[#f9a8d4] px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-[#f9a8d4]"
@@ -47,11 +83,19 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="mt-2 inline-flex items-center justify-center rounded-full bg-[#ec4899] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#db2777]"
+            className="mt-2 inline-flex items-center justify-center rounded-full bg-[#ec4899] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#db2777] disabled:opacity-60"
           >
             {loading ? "Please wait…" : "Login"}
           </button>
         </form>
+
+        <button
+          type="button"
+          onClick={handleGoogleLogin}
+          className="mt-3 w-full inline-flex items-center justify-center rounded-full border border-[#f9a8d4] px-5 py-2 text-xs font-medium text-[#47201d] hover:bg-[#fff1f7] transition"
+        >
+          Continue with Google
+        </button>
 
         <p className="text-[11px] text-[#a36d63] mt-4 text-center">
           Don't have an account?{" "}

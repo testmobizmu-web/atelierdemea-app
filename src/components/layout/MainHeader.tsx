@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { useLanguage } from "@/components/layout/LanguageSwitcher";
+import UserMenu from "./UserMenu";
 
 type MainHeaderProps = {
   logoUrl?: string | null;
@@ -176,30 +177,17 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
             </nav>
 
             {/* Actions (RIGHT) */}
-            <div className="flex items-center justify-end gap-3 sm:gap-4">
-              <Link
-                href="/login"
-                className="text-[11px] sm:text-xs hover:text-[#e11d70]"
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="inline-flex items-center justify-center rounded-full border border-[#f9a8d4] px-3 py-1.5 text-[11px] sm:text-xs font-medium text-[#47201d] hover:bg-[#fff1f7] transition"
-              >
-                Sign up
-              </Link>
-
-              <Link
-                href="/cart"
-                aria-label="Cart"
-                className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#fde7f1] hover:bg-[#fff1f7] transition"
-              >
-                <span className="sr-only">Cart</span>
-                <span className="text-lg">🛒</span>
-              </Link>
-            </div>
-          </div>
+<div className="flex items-center justify-end gap-3 sm:gap-4">
+  <UserMenu />
+  <Link
+    href="/cart"
+    aria-label="Cart"
+    className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#fde7f1] hover:bg-[#fff1f7] transition"
+  >
+    <span className="sr-only">Cart</span>
+    <span className="text-lg">🛒</span>
+  </Link>
+</div>
 
           {/* ---------- MOBILE LAYOUT ---------- */}
           <div className="flex md:hidden items-center justify-between gap-3">

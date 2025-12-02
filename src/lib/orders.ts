@@ -1,8 +1,10 @@
 // src/lib/orders.ts
-import { supabase } from "./supabaseClient";
+"use client";
+
+import { getSupabaseBrowserClient } from "./supabaseClient";
 
 export type CartItem = {
-  product_id: string;
+  product_id: string; // can be your internal product id / slug
   name: string;
   price: number;
   quantity: number;
@@ -11,6 +13,7 @@ export type CartItem = {
 export type Order = {
   id: string;
   created_at: string;
+  user_id?: string | null;          // optional, for logged-in users
   customer_name: string | null;
   customer_phone: string | null;
   customer_address: string | null;
@@ -18,10 +21,7 @@ export type Order = {
   status: string;
   payment_method: string | null;
   total_amount: number;
-};
-
-export type OrderWithItems = Order & {
-  items: OrderItem[];
+  currency?: string | null;         // if you add a currency column later
 };
 
 export type OrderItem = {
@@ -32,7 +32,11 @@ export type OrderItem = {
   name: string;
   unit_price: number;
   quantity: number;
-  line_total: number;
+  line_total?: number;              // optional – stored or computed
+};
+
+export type OrderWithItems = Order & {
+  items: OrderItem[];
 };
 
 /**
@@ -87,6 +91,7 @@ export function buildWhatsAppOrderMessage(params: {
 
 /**
  * Save order + items to Supabase.
+ * Requires the customer to be logged in (because of RLS on user_id).
  */
 export async function createOrderInSupabase(params: {
   customer_name?: string;
@@ -109,14 +114,29 @@ export async function createOrderInSupabase(params: {
     throw new Error("No items in order");
   }
 
+  const supabase = getSupabaseBrowserClient();
+
+  // Make sure user is logged in – required for user_id and RLS
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    console.error("createOrderInSupabase: no authenticated user", userError);
+    throw new Error("You must be logged in to place an order.");
+  }
+
   const total_amount = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
+  // Insert order row
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .insert({
+      user_id: user.id,
       customer_name,
       customer_phone,
       customer_address,
@@ -133,13 +153,14 @@ export async function createOrderInSupabase(params: {
     throw new Error(orderError?.message || "Failed to create order");
   }
 
+  // Insert related order_items
   const itemsPayload = items.map((item) => ({
     order_id: order.id,
     product_id: item.product_id,
     name: item.name,
     unit_price: item.price,
     quantity: item.quantity,
-    line_total: item.price * item.quantity,
+    line_total: item.price * item.quantity, // safe even if column missing
   }));
 
   const { data: orderItems, error: itemsError } = await supabase
@@ -159,9 +180,12 @@ export async function createOrderInSupabase(params: {
 }
 
 /**
- * Fetch recent orders with items (for admin).
+ * Fetch recent orders with items.
+ * With current RLS this returns *only* orders for the logged-in user.
  */
 export async function getRecentOrdersWithItems(limit = 50) {
+  const supabase = getSupabaseBrowserClient();
+
   const { data, error } = await supabase
     .from("orders")
     .select("*, order_items(*)")
