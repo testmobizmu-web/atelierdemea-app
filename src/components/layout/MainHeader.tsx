@@ -4,6 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { useCart } from "@/components/cart/CartContext";
 
 type MainHeaderProps = {
@@ -13,9 +14,10 @@ type MainHeaderProps = {
 
 export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { openCart } = useCart(); // 👈 use cart drawer
+  const { openCart } = useCart(); // ✅ use cart drawer
 
   const displayName = siteName || "Atelier de Méa";
+  // Fallback to local logo
   const effectiveLogo = logoUrl || "/logo/logo.png";
 
   return (
@@ -23,18 +25,10 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
       {/* ============ TOP PINK STRIP (LANG + TAGLINE + SOCIAL) ============ */}
       <div className="bg-[#be185d] text-white text-[10px] sm:text-[11px]">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-1.5 flex items-center justify-between gap-3">
-          {/* Left: language flags (visual only for now) */}
+          {/* Left: language switcher */}
           <div className="flex items-center gap-2">
             <span className="font-semibold">LANG :</span>
-            <button className="flex items-center gap-1 hover:opacity-90">
-              <Image src="/flags/en.png" alt="English" width={14} height={14} />
-              <span>EN</span>
-            </button>
-            <span className="text-white/40 text-xs">/</span>
-            <button className="flex items-center gap-1 hover:opacity-90">
-              <Image src="/flags/fr.png" alt="Français" width={14} height={14} />
-              <span>FR</span>
-            </button>
+            <LanguageSwitcher />
           </div>
 
           {/* Center: tagline */}
@@ -42,7 +36,7 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
             Handmade with 💗 in Mauritius – Premium turbans, bags &amp; clothing
           </div>
 
-          {/* Right: socials */}
+          {/* Right: Follow us + social icons */}
           <div className="flex items-center gap-2">
             <span className="hidden sm:inline text-white/90">Follow us:</span>
 
@@ -94,7 +88,7 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
       {/* ============ MAIN NAV BAR ============ */}
       <div className="border-b border-[#fde7f1] bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
-          {/* ---------- DESKTOP ---------- */}
+          {/* ---------- DESKTOP LAYOUT (logo left, nav centered, actions right) ---------- */}
           <div className="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-4">
             {/* Logo + brand (LEFT) */}
             <Link href="/" className="flex items-center gap-3">
@@ -119,27 +113,27 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
               </div>
             </Link>
 
-           <nav className="flex justify-center gap-6 text-xs sm:text-sm">
-            <Link href="/" className="font-semibold text-[#e11d70]">
-             Home
-            </Link>
-            {/* NEW ARRIVALS PAGE */}
-            <Link href="/new-arrivals" className="hover:text-[#e11d70]">
-             New Arrivals
-           </Link>
-            {/* CATEGORIES / SHOP PAGE */}
-            <Link href="/shop" className="hover:text-[#e11d70]">
-             Categories
-           </Link>
-           <Link href="/about" className="hover:text-[#e11d70]">
-             About Us
-           </Link>
-           <Link href="/support" className="hover:text-[#e11d70]">
-            Support
-           </Link>
-          </nav>
+            {/* Menu centered (CENTER) */}
+            <nav className="flex justify-center gap-6 text-xs sm:text-sm">
+              <Link href="/" className="font-semibold text-[#e11d70]">
+                Home
+              </Link>
+              {/* New arrivals has its OWN page */}
+              <Link href="/new-arrivals" className="hover:text-[#e11d70]">
+                New Arrivals
+              </Link>
+              <Link href="/shop" className="hover:text-[#e11d70]">
+                Categories
+              </Link>
+              <Link href="/about" className="hover:text-[#e11d70]">
+                About Us
+              </Link>
+              <Link href="/support" className="hover:text-[#e11d70]">
+                Support
+              </Link>
+            </nav>
 
-            {/* Right actions */}
+            {/* Actions (RIGHT) */}
             <div className="flex items-center justify-end gap-3 sm:gap-4">
               <Link
                 href="/login"
@@ -154,11 +148,11 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
                 Sign up
               </Link>
 
-              {/* Cart button opens drawer instead of /cart page */}
+              {/* 🛒 Cart now opens drawer instead of /cart */}
               <button
                 type="button"
                 onClick={openCart}
-                aria-label="Cart"
+                aria-label="Open cart"
                 className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#fde7f1] hover:bg-[#fff1f7] transition"
               >
                 <span className="sr-only">Cart</span>
@@ -167,9 +161,9 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
             </div>
           </div>
 
-          {/* ---------- MOBILE ---------- */}
+          {/* ---------- MOBILE LAYOUT ---------- */}
           <div className="flex md:hidden items-center justify-between gap-3">
-            {/* Logo */}
+            {/* Logo + brand on mobile (LEFT) */}
             <Link href="/" className="flex items-center gap-2">
               <div className="relative h-9 w-9 rounded-full overflow-hidden">
                 <Image
@@ -193,10 +187,11 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
 
             {/* Right: cart + hamburger */}
             <div className="flex items-center gap-2">
+              {/* 🛒 Mobile cart also opens drawer */}
               <button
                 type="button"
                 onClick={openCart}
-                aria-label="Cart"
+                aria-label="Open cart"
                 className="relative inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#fde7f1] hover:bg-[#fff1f7] transition"
               >
                 <span className="sr-only">Cart</span>
@@ -219,24 +214,25 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
         {/* Mobile slide-down menu */}
         {menuOpen && (
           <div className="md:hidden border-t border-[#fde7f1] bg-white">
-             <nav className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col gap-2 text-sm">
+            <nav className="max-w-7xl mx-auto px-3 sm:px-6 py-3 flex flex-col gap-2 text-sm">
               <Link href="/" className="py-1 hover:text-[#e11d70]">
-               Home
+                Home
               </Link>
-              <Link href="/new-arrivals" className="py-1 hover:text-[#e11d70]">
-               New Arrivals
+              <Link
+                href="/new-arrivals"
+                className="py-1 hover:text-[#e11d70]"
+              >
+                New Arrivals
               </Link>
               <Link href="/shop" className="py-1 hover:text-[#e11d70]">
-               Categories
+                Categories
               </Link>
               <Link href="/about" className="py-1 hover:text-[#e11d70]">
-               About Us
+                About Us
               </Link>
               <Link href="/support" className="py-1 hover:text-[#e11d70]">
-               Support
+                Support
               </Link>
-                ...
-              </nav>
 
               <div className="flex gap-3 pt-2">
                 <Link
