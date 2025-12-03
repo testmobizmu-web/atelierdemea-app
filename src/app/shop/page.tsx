@@ -7,6 +7,7 @@ export const revalidate = 0;
 
 type SearchParams = {
   category?: string;
+  q?: string;
 };
 
 export default async function ShopPage({
@@ -17,10 +18,11 @@ export default async function ShopPage({
 }) {
   const resolved = await searchParams;
   const categoryFilter = resolved.category ?? "";
+  const query = (resolved.q ?? "").toLowerCase().trim();
 
   const products = await getAllProducts();
 
-  // Unique category list (for filter chips)
+  // Unique category list (for sidebar)
   const categories = Array.from(
     new Set(
       products
@@ -29,23 +31,31 @@ export default async function ShopPage({
     )
   ).sort();
 
-  // Apply category filter (if any)
-  const filteredProducts =
-    categoryFilter && categoryFilter.length > 0
-      ? products.filter(
-          (p) =>
-            (p.category || "").toLowerCase() ===
-            categoryFilter.toLowerCase()
-        )
-      : products;
+  // Apply category + search filter
+  const filteredProducts = products.filter((p) => {
+    const matchesCategory =
+      !categoryFilter ||
+      (p.category || "").toLowerCase() === categoryFilter.toLowerCase();
+
+    const text =
+      `${p.name} ${p.short_description ?? ""} ${
+        p.long_description ?? ""
+      }`.toLowerCase();
+
+    const matchesSearch = !query || text.includes(query);
+
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <main className="min-h-screen bg-white text-[#47201d]">
-      {/* Page header */}
-      <section className="border-b bg-white">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      {/* =========================
+          PAGE HERO
+      ========================== */}
+      <section className="border-b bg-gradient-to-br from-[#fff7fb] via-white to-[#ffe4f3]">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-8 sm:py-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[#e11d70] mb-1">
+            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-[#e11d70] mb-2">
               <span className="inline-block h-1 w-6 rounded-full bg-[#e11d70]" />
               <span>Shop</span>
             </div>
@@ -53,15 +63,24 @@ export default async function ShopPage({
               Shop Atelier de Méa
             </h1>
             <p className="mt-2 text-xs sm:text-sm text-[#a36d63] max-w-xl">
-              Discover handmade turbans, clothing and bags created with love in
-              Roche Bois, Mauritius. All prices in Mauritian Rupees (Rs).
+              Browse all handmade turbans, bandeaux, outfits and bags. Use the
+              search and side filters to quickly find the style you love.
             </p>
-            {categoryFilter && (
-              <p className="mt-1 text-[11px] sm:text-xs text-[#e11d70]">
-                Browsing category:&nbsp;
-                <span className="font-semibold">
-                  {categoryFilter}
-                </span>
+            {(categoryFilter || query) && (
+              <p className="mt-2 text-[11px] sm:text-xs text-[#e11d70]">
+                {categoryFilter && (
+                  <>
+                    Category:&nbsp;
+                    <span className="font-semibold">{categoryFilter}</span>
+                  </>
+                )}
+                {categoryFilter && query && <span>&nbsp;·&nbsp;</span>}
+                {query && (
+                  <>
+                    Search:&nbsp;
+                    <span className="font-semibold">“{resolved.q}”</span>
+                  </>
+                )}
               </p>
             )}
           </div>
@@ -71,10 +90,7 @@ export default async function ShopPage({
               <span className="font-semibold">
                 {filteredProducts.length}
               </span>{" "}
-              products shown
-              {categoryFilter
-                ? ` in "${categoryFilter}" category`
-                : " in total"}
+              product{filteredProducts.length === 1 ? "" : "s"} shown
             </div>
             <a
               href="https://wa.me/23059117549"
@@ -87,59 +103,108 @@ export default async function ShopPage({
         </div>
       </section>
 
-      {/* Filters */}
-      <section className="border-b bg-[#fff7fb]">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-4 flex flex-wrap gap-2 items-center text-xs sm:text-sm">
-          <span className="text-[11px] uppercase tracking-[0.2em] text-[#a36d63] mr-2">
-            Browse by category:
-          </span>
-
-          <Link
-            href="/shop"
-            className={`px-3 py-1.5 rounded-full border text-xs sm:text-sm ${
-              !categoryFilter
-                ? "bg-[#ec4899] border-[#ec4899] text-white"
-                : "border-[#f9a8d4] text-[#47201d] hover:bg-[#fff1f7]"
-            }`}
-          >
-            All products
-          </Link>
-
-          {categories.map((cat) => {
-            const active =
-              cat.toLowerCase() === categoryFilter.toLowerCase();
-            return (
-              <Link
-                key={cat}
-                href={`/shop?category=${encodeURIComponent(cat)}`}
-                className={`px-3 py-1.5 rounded-full border text-xs sm:text-sm ${
-                  active
-                    ? "bg-[#ec4899] border-[#ec4899] text-white"
-                    : "border-[#f9a8d4] text-[#47201d] hover:bg-[#fff1f7]"
-                }`}
-              >
-                {cat}
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Product grid */}
+      {/* =========================
+          CONTENT: SIDEBAR + GRID
+      ========================== */}
       <section className="bg-white">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-8 sm:py-10">
-          {filteredProducts.length === 0 ? (
-            <p className="text-sm text-[#a36d63]">
-              No products found in this category yet. Please choose another
-              category or check back soon.
-            </p>
-          ) : (
-            <div className="grid gap-5 sm:gap-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-8 sm:py-10 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+          {/* ---------- SIDEBAR ---------- */}
+          <aside className="space-y-6 lg:border-r lg:border-[#fde7f1] lg:pr-6">
+            {/* Search */}
+            <div>
+              <h2 className="text-sm font-semibold text-[#47201d] mb-2">
+                Search
+              </h2>
+              <form method="GET" className="relative">
+                {/* keep current category in the query when searching */}
+                {categoryFilter && (
+                  <input
+                    type="hidden"
+                    name="category"
+                    value={categoryFilter}
+                  />
+                )}
+                <input
+                  type="text"
+                  name="q"
+                  defaultValue={resolved.q ?? ""}
+                  placeholder="Search turbans, bandeaux, bags..."
+                  className="w-full rounded-full border border-[#f9a8d4] px-3 py-2 pr-8 text-xs outline-none focus:ring-2 focus:ring-[#f9a8d4]"
+                />
+                <button
+                  type="submit"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[13px]"
+                  aria-label="Search"
+                >
+                  🔍
+                </button>
+              </form>
             </div>
-          )}
+
+            {/* Categories list */}
+            <div>
+              <h2 className="text-sm font-semibold text-[#47201d] mb-2">
+                Categories
+              </h2>
+              <div className="flex flex-wrap lg:flex-col gap-2 text-xs">
+                {/* All products chip */}
+                <Link
+                  href={resolved.q ? `/shop?q=${encodeURIComponent(resolved.q)}` : "/shop"}
+                  className={`rounded-full px-3 py-1.5 border text-left ${
+                    !categoryFilter
+                      ? "bg-[#ec4899] border-[#ec4899] text-white"
+                      : "bg-white border-[#f9a8d4] text-[#47201d] hover:bg-[#fff1f7]"
+                  }`}
+                >
+                  All products
+                </Link>
+
+                {categories.map((cat) => {
+                  const active =
+                    cat.toLowerCase() === categoryFilter.toLowerCase();
+                  const href = new URLSearchParams();
+                  href.set("category", cat);
+                  if (resolved.q) href.set("q", resolved.q);
+
+                  return (
+                    <Link
+                      key={cat}
+                      href={`/shop?${href.toString()}`}
+                      className={`rounded-full px-3 py-1.5 border text-left ${
+                        active
+                          ? "bg-[#ec4899] border-[#ec4899] text-white"
+                          : "bg-white border-[#f9a8d4] text-[#47201d] hover:bg-[#fff1f7]"
+                      }`}
+                    >
+                      {cat}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Info card */}
+            <div className="hidden lg:block rounded-2xl border border-[#fde7f1] bg-[#fff7fb] px-3 py-3 text-[11px] text-[#a36d63]">
+              💡 Tip: combine search + category filters to quickly find a
+              specific colour, fabric or style.
+            </div>
+          </aside>
+
+          {/* ---------- PRODUCT GRID ---------- */}
+          <div>
+            {filteredProducts.length === 0 ? (
+              <p className="text-xs sm:text-sm text-[#a36d63]">
+                No products match your filters. Try clearing the search or
+                choosing another category.
+              </p>
+            ) : (
+              <div className="grid gap-5 sm:gap-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </main>

@@ -1,8 +1,9 @@
+// src/app/signup/page.tsx
 "use client";
 
 import Link from "next/link";
 import { useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 import { syncProfileFromAuth } from "@/lib/profile";
 
 export default function SignupPage() {
@@ -18,8 +19,6 @@ export default function SignupPage() {
     const name = String(formData.get("name"));
     const email = String(formData.get("email"));
     const password = String(formData.get("password"));
-
-    const supabase = getSupabaseBrowserClient();
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -37,23 +36,15 @@ export default function SignupPage() {
       return;
     }
 
-    // if email confirmation disabled, user is already logged in → sync profile
+    // If email confirmation disabled, user is already logged in → sync profile
     await syncProfileFromAuth();
 
     alert("Account created! Please check your email to confirm (if required).");
     setLoading(false);
   };
 
-  // ... rest of UI stays same (Google button, etc.)
-}
-
-    // You can choose: require email confirmation or auto-login
-    alert("Account created! Please check your email to confirm.");
-    setLoading(false);
-  };
-
   const handleGoogleSignup = async () => {
-    const supabase = getSupabaseBrowserClient();
+    setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -127,7 +118,10 @@ export default function SignupPage() {
 
         <p className="text-[11px] text-[#a36d63] mt-4 text-center">
           Already have an account?{" "}
-          <Link href="/login" className="text-[#e11d70] font-semibold underline">
+          <Link
+            href="/login"
+            className="text-[#e11d70] font-semibold underline"
+          >
             Login
           </Link>
         </p>
@@ -135,3 +129,4 @@ export default function SignupPage() {
     </div>
   );
 }
+

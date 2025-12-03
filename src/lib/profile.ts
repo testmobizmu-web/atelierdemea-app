@@ -1,28 +1,41 @@
+// src/lib/profile.ts
 "use client";
 
-import { getSupabaseBrowserClient } from "./supabaseClient";
+import { supabase } from "./supabaseClient";
 
 export async function syncProfileFromAuth() {
-  const supabase = getSupabaseBrowserClient();
-
+  // Get current authenticated user
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
 
-  if (!user) return;
+  if (error || !user) {
+    if (error) {
+      console.error("syncProfileFromAuth: getUser error", error);
+    }
+    return;
+  }
 
   const fullName =
-    (user.user_metadata && (user.user_metadata.full_name as string)) ||
-    (user.user_metadata && (user.user_metadata.name as string)) ||
-    "";
+    (user.user_metadata?.full_name as string) ||
+    (user.user_metadata?.name as string) ||
+    null;
 
-  await supabase
-    .from("profiles")
-    .upsert(
-      {
-        id: user.id,
-        full_name: fullName,
-      },
-      { onConflict: "id" }
-    );
+  const { error: upsertError } = await supabase.from("profiles").upsert(
+    {
+      id: user.id,
+      email: user.email,
+      full_name: fullName,
+      updated_at: new Date().toISOString(),
+    },
+    {
+      // depending on your schema this might be "id" or a composite key
+      onConflict: "id",
+    }
+  );
+
+  if (upsertError) {
+    console.error("syncProfileFromAuth: upsert error", upsertError);
+  }
 }

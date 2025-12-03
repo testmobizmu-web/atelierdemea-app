@@ -1,8 +1,10 @@
+
+// src/components/layout/UserMenu.tsx
 "use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 
 type UserData = {
   id: string;
@@ -15,8 +17,6 @@ export default function UserMenu() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const supabase = getSupabaseBrowserClient();
-
     // initial check
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
@@ -56,15 +56,12 @@ export default function UserMenu() {
   }, []);
 
   const handleLogout = async () => {
-    const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
     setUser(null);
     window.location.href = "/";
   };
 
-  if (loading) {
-    return null;
-  }
+  if (loading) return null;
 
   // Not logged in → show Login / Sign up
   if (!user) {

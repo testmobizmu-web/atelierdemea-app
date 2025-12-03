@@ -1,10 +1,14 @@
+// src/components/cart/CartDrawer.tsx
 "use client";
 
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCart } from "./CartContext";
 
 export default function CartDrawer() {
+  const router = useRouter();
+
   const {
     items,
     isOpen,
@@ -14,7 +18,6 @@ export default function CartDrawer() {
     removeItem,
   } = useCart();
 
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const subtotal = items.reduce(
@@ -22,49 +25,14 @@ export default function CartDrawer() {
     0
   );
 
-  async function handleOrderOnWhatsApp() {
-    if (!items.length || submitting) return;
-
-    try {
-      setSubmitting(true);
-      setError(null);
-
-      const payload = {
-        // later we’ll extend with address / name / phone
-        items: items.map((item) => ({
-          product_id: item.id, // ✅ use id from CartItem
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          slug: item.slug,
-        })),
-        payment_method: "COD",
-      };
-
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Could not create order");
-      }
-
-      const data = await res.json();
-      if (data.whatsappUrl) {
-        window.open(data.whatsappUrl, "_blank");
-      }
-
-      clearCart();
-      closeCart();
-    } catch (err: any) {
-      console.error("Order error:", err);
-      setError(err.message ?? "Something went wrong. Please try again.");
-    } finally {
-      setSubmitting(false);
+  function handleGoToCheckout() {
+    if (!items.length) {
+      setError("Your bag is empty.");
+      return;
     }
+    setError(null);
+    closeCart();
+    router.push("/checkout");
   }
 
   return (
@@ -112,7 +80,7 @@ export default function CartDrawer() {
           ) : (
             items.map((item) => (
               <div
-                key={item.id} // ✅ key uses id
+                key={item.id}
                 className="flex gap-3 rounded-2xl border border-[#fde7f1] bg-[#fff7fb] p-3"
               >
                 <div className="relative h-16 w-16 rounded-2xl overflow-hidden bg-[#fff1f7] border border-[#fde7f1] shrink-0">
@@ -191,7 +159,7 @@ export default function CartDrawer() {
           </div>
           <p className="text-[11px] text-[#a36d63]">
             Cash on Delivery in Mauritius. Final total (incl. delivery) will be
-            confirmed on WhatsApp.
+            confirmed at checkout and on WhatsApp.
           </p>
 
           {error && (
@@ -202,16 +170,26 @@ export default function CartDrawer() {
 
           <button
             type="button"
-            onClick={handleOrderOnWhatsApp}
-            disabled={!items.length || submitting}
+            onClick={handleGoToCheckout}
+            disabled={!items.length}
             className="w-full inline-flex items-center justify-center rounded-full bg-[#ec4899] px-5 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-[#db2777] transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {submitting ? "Preparing WhatsApp…" : "Order now on WhatsApp"}
+            Proceed to checkout
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              clearCart();
+              setError(null);
+            }}
+            disabled={!items.length}
+            className="w-full mt-2 inline-flex items-center justify-center rounded-full border border-[#f9a8d4] px-5 py-2 text-[11px] sm:text-xs font-medium text-[#47201d] hover:bg-[#fff7fb] transition disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            Clear bag
           </button>
         </div>
       </aside>
     </>
   );
 }
-
-

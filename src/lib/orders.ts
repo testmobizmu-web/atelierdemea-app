@@ -1,10 +1,10 @@
 // src/lib/orders.ts
 "use client";
 
-import { getSupabaseBrowserClient } from "./supabaseClient";
+import { supabase } from "./supabaseClient";
 
 export type CartItem = {
-  product_id: string; // can be your internal product id / slug
+  product_id: string; // your internal product id / slug
   name: string;
   price: number;
   quantity: number;
@@ -13,7 +13,7 @@ export type CartItem = {
 export type Order = {
   id: string;
   created_at: string;
-  user_id?: string | null;          // optional, for logged-in users
+  user_id?: string | null;
   customer_name: string | null;
   customer_phone: string | null;
   customer_address: string | null;
@@ -21,7 +21,7 @@ export type Order = {
   status: string;
   payment_method: string | null;
   total_amount: number;
-  currency?: string | null;         // if you add a currency column later
+  currency?: string | null;
 };
 
 export type OrderItem = {
@@ -32,7 +32,7 @@ export type OrderItem = {
   name: string;
   unit_price: number;
   quantity: number;
-  line_total?: number;              // optional – stored or computed
+  line_total?: number;
 };
 
 export type OrderWithItems = Order & {
@@ -114,8 +114,6 @@ export async function createOrderInSupabase(params: {
     throw new Error("No items in order");
   }
 
-  const supabase = getSupabaseBrowserClient();
-
   // Make sure user is logged in – required for user_id and RLS
   const {
     data: { user },
@@ -160,7 +158,7 @@ export async function createOrderInSupabase(params: {
     name: item.name,
     unit_price: item.price,
     quantity: item.quantity,
-    line_total: item.price * item.quantity, // safe even if column missing
+    line_total: item.price * item.quantity,
   }));
 
   const { data: orderItems, error: itemsError } = await supabase
@@ -184,8 +182,6 @@ export async function createOrderInSupabase(params: {
  * With current RLS this returns *only* orders for the logged-in user.
  */
 export async function getRecentOrdersWithItems(limit = 50) {
-  const supabase = getSupabaseBrowserClient();
-
   const { data, error } = await supabase
     .from("orders")
     .select("*, order_items(*)")
