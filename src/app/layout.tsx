@@ -9,8 +9,8 @@ import FloatingWhatsApp from "@/components/layout/FloatingWhatsApp";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import { MainHeader } from "@/components/layout/MainHeader";
 import { getShopSettings } from "@/lib/settings";
-
 import { LanguageProvider } from "@/components/layout/LanguageSwitcher";
+import { MainFooter } from "@/components/layout/MainFooter";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -44,17 +44,19 @@ export default async function RootLayout({
         <link rel="icon" href={faviconUrl} />
       </head>
       <body className={`${inter.className} bg-white text-[#47201d]`}>
-        {/* ✅ Language available everywhere */}
         <LanguageProvider>
           <CartProvider>
             <div className="min-h-screen flex flex-col">
-              {/* Header with language switcher inside */}
+              {/* Header */}
               <MainHeader logoUrl={logoUrl} siteName={siteName} />
 
               {/* Page content */}
               <main className="flex-1">{children}</main>
 
-              {/* Global UI */}
+              {/* Global footer on EVERY page */}
+              <MainFooter />
+
+              {/* Global overlays */}
               <CartDrawer />
               <FloatingWhatsApp />
               <ScrollToTop />
@@ -65,5 +67,3 @@ export default async function RootLayout({
     </html>
   );
 }
-
-
