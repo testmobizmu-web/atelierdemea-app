@@ -1,7 +1,10 @@
+// src/app/products/[slug]/page.tsx
 import Link from "next/link";
 import Image from "next/image";
 import { getProductBySlug } from "@/lib/products";
 import { AddToCartControls } from "@/components/cart/AddToCartControls";
+import ProductReviews from "@/components/product/ProductReviews";
+//                                  ^^^^^^^ lower-case folder
 
 // Disable static cache – always fetch fresh
 export const revalidate = 0;
@@ -40,9 +43,7 @@ export default async function ProductPage({
             </span>
           </nav>
 
-          <h1 className="text-2xl font-semibold mb-3">
-            Product not found
-          </h1>
+          <h1 className="text-2xl font-semibold mb-3">Product not found</h1>
           <p className="mb-4 text-sm text-[#a36d63]">
             We couldn&apos;t find any product with this link. The item may have
             been removed or the URL is incorrect.
@@ -75,6 +76,10 @@ export default async function ProductPage({
     product.stock === null ||
     product.stock === undefined ||
     product.stock > 0;
+
+  // ✅ Handle images array safely
+  const images = Array.isArray(product.images) ? product.images : [];
+  const primaryImage = images.length > 0 ? images[0] : null;
 
   return (
     <main className="min-h-screen bg-white text-[#47201d]">
@@ -125,12 +130,12 @@ export default async function ProductPage({
       {/* Main product layout */}
       <section className="bg-white">
         <div className="max-w-6xl mx-auto px-4 py-8 lg:py-10 grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)]">
-          {/* LEFT: main image + thumbnail */}
+          {/* LEFT: main image + thumbnails */}
           <div className="space-y-4">
             <div className="relative w-full aspect-[4/5] rounded-3xl border border-[#fde7f1] bg-[#fff1f7] overflow-hidden">
-              {product.image_url ? (
+              {primaryImage ? (
                 <Image
-                  src={product.image_url}
+                  src={primaryImage}
                   alt={product.name}
                   fill
                   className="object-cover"
@@ -140,6 +145,7 @@ export default async function ProductPage({
                   No image available
                 </div>
               )}
+
               {product.is_featured && (
                 <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[10px] font-semibold text-[#e11d70] shadow-sm">
                   Featured
@@ -152,23 +158,24 @@ export default async function ProductPage({
               )}
             </div>
 
-            {/* Thumbnail (single for now) */}
-            <div className="flex gap-3">
-              <div className="w-20 h-24 rounded-2xl border border-[#fde7f1] overflow-hidden bg-[#fff1f7]">
-                {product.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-[10px] text-[#e5a4bc]">
-                    No image
+            {/* Thumbnails – up to 4 */}
+            {images.length > 0 && (
+              <div className="flex gap-3">
+                {images.slice(0, 4).map((img, idx) => (
+                  <div
+                    key={idx}
+                    className="w-20 h-24 rounded-2xl border border-[#fde7f1] overflow-hidden bg-[#fff1f7]"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={img}
+                      alt={`${product.name} ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                )}
+                ))}
               </div>
-            </div>
+            )}
           </div>
 
           {/* RIGHT: details */}
@@ -200,9 +207,7 @@ export default async function ProductPage({
                     product.stock > 0 && (
                       <div className="mt-1">
                         Approx. stock:{" "}
-                        <span className="font-medium">
-                          {product.stock}
-                        </span>
+                        <span className="font-medium">{product.stock}</span>
                       </div>
                     )}
                 </div>
@@ -212,16 +217,16 @@ export default async function ProductPage({
                 {description}
               </p>
 
-             {/* ✅ Cart + quantity controls (side cart + WhatsApp flow) */}
-             <div className="pt-2 border-t border-[#fde7f1] mt-2">
-               <AddToCartControls
-                 productId={product.id}
-                 slug={product.slug}
-                 name={product.name}
-                 price={product.price}
-                  imageUrl={product.image_url}
-           />
-         </div>
+              {/* ✅ Cart + quantity controls (side cart + WhatsApp flow) */}
+              <div className="pt-2 border-t border-[#fde7f1] mt-2">
+                <AddToCartControls
+                  productId={product.id}
+                  slug={product.slug}
+                  name={product.name}
+                  price={product.price}
+                  imageUrl={primaryImage || undefined}
+                />
+              </div>
 
               {/* Secondary actions */}
               <div className="pt-3 flex flex-wrap gap-3 text-[11px] sm:text-xs">
@@ -247,26 +252,8 @@ export default async function ProductPage({
             {/* Details + care tips */}
             <div className="space-y-4">
               <div>
-                <h2 className="text-sm font-semibold mb-2">
-                  Product details
-                </h2>
+                <h2 className="text-sm font-semibold mb-2">Product details</h2>
                 <ul className="text-xs sm:text-sm text-[#a36d63] space-y-1">
-                  {product.color && (
-                    <li>
-                      <span className="font-medium text-[#47201d]">
-                        Colour:
-                      </span>{" "}
-                      {product.color}
-                    </li>
-                  )}
-                  {product.variant && (
-                    <li>
-                      <span className="font-medium text-[#47201d]">
-                        Size / Variant:
-                      </span>{" "}
-                      {product.variant}
-                    </li>
-                  )}
                   {product.category && (
                     <li>
                       <span className="font-medium text-[#47201d]">
@@ -276,9 +263,7 @@ export default async function ProductPage({
                     </li>
                   )}
                   <li>
-                    <span className="font-medium text-[#47201d]">
-                      Origin:
-                    </span>{" "}
+                    <span className="font-medium text-[#47201d]">Origin:</span>{" "}
                     Handmade in Mauritius
                   </li>
                 </ul>
@@ -299,6 +284,14 @@ export default async function ProductPage({
           </div>
         </div>
       </section>
+
+      {/* Reviews section */}
+      <section className="bg-white border-t border-[#fde7f1]">
+        <div className="max-w-6xl mx-auto px-4 py-8 lg:py-10">
+          <ProductReviews productId={product.id} productName={product.name} />
+        </div>
+      </section>
     </main>
   );
 }
+

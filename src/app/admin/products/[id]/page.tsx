@@ -1,3 +1,4 @@
+// src/app/admin/products/[id]/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,12 +14,17 @@ export default function AdminEditProductPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const [product, setProduct] = useState<Product | null>(null);
+
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [price, setPrice] = useState<string>("");
   const [category, setCategory] = useState("");
   const [stock, setStock] = useState<string>("");
+
+  // we only edit the *primary* image URL here, mapped to images[0]
   const [imageUrl, setImageUrl] = useState("");
+
   const [shortDescription, setShortDescription] = useState("");
   const [longDescription, setLongDescription] = useState("");
 
@@ -26,12 +32,13 @@ export default function AdminEditProductPage() {
   const [isNew, setIsNew] = useState(false);
   const [isBestSeller, setIsBestSeller] = useState(false);
   const [isOnSale, setIsOnSale] = useState(false);
-  const [saleBadgeLabel, setSaleBadgeLabel] = useState("");
+  const [isLimited, setIsLimited] = useState(false);
 
   useEffect(() => {
     if (!id) return;
 
     (async () => {
+      // basic auth check – reuse your existing supabase auth
       const { data: sessionData } = await supabase.auth.getSession();
       if (!sessionData.session) {
         router.replace("/admin/login");
@@ -56,6 +63,8 @@ export default function AdminEditProductPage() {
       }
 
       const p = data as Product;
+      setProduct(p);
+
       setName(p.name);
       setSlug(p.slug);
       setPrice(p.price.toString());
@@ -63,7 +72,10 @@ export default function AdminEditProductPage() {
       setStock(
         p.stock === null || p.stock === undefined ? "" : p.stock.toString()
       );
-      setImageUrl(p.image_url || "");
+
+      // ✅ primary image from images[0]
+      setImageUrl(p.images?.[0] || "");
+
       setShortDescription(p.short_description || "");
       setLongDescription(p.long_description || "");
 
@@ -71,7 +83,7 @@ export default function AdminEditProductPage() {
       setIsNew(p.is_new ?? false);
       setIsBestSeller(p.is_best_seller ?? false);
       setIsOnSale(p.is_on_sale ?? false);
-      setSaleBadgeLabel(p.sale_badge_label || "");
+      setIsLimited(p.is_limited ?? false);
 
       setLoading(false);
     })();
@@ -86,25 +98,31 @@ export default function AdminEditProductPage() {
 
     setSaving(true);
 
+    // ✅ keep existing extra images if they exist
+    const existingImages = product?.images ?? [];
+    const updatedImages = imageUrl
+      ? [imageUrl, ...existingImages.slice(1)]
+      : existingImages;
+
+    const updateData = {
+      name,
+      slug,
+      price: Number(price),
+      category: category || null,
+      stock: stock ? Number(stock) : null,
+      images: updatedImages,
+      short_description: shortDescription || null,
+      long_description: longDescription || null,
+      is_featured: isFeatured,
+      is_new: isNew,
+      is_best_seller: isBestSeller,
+      is_on_sale: isOnSale,
+      is_limited: isLimited,
+    };
+
     const { error } = await supabase
       .from("products")
-      .update({
-        name,
-        slug,
-        price: Number(price),
-        category: category || null,
-        stock: stock ? Number(stock) : null,
-        image_url: imageUrl || null,
-        short_description: shortDescription || null,
-        long_description: longDescription || null,
-        is_featured: isFeatured,
-        is_new: isNew,
-        is_best_seller: isBestSeller,
-        is_on_sale: isOnSale,
-        sale_badge_label: isOnSale
-          ? saleBadgeLabel || "Sale"
-          : null,
-      })
+      .update(updateData)
       .eq("id", id);
 
     setSaving(false);
@@ -133,7 +151,7 @@ export default function AdminEditProductPage() {
             Edit Product
           </h1>
           <p className="text-xs text-[#7A6058]">
-            Update product information and badges.
+            Update product information, image and badges.
           </p>
         </div>
       </div>
@@ -212,17 +230,20 @@ export default function AdminEditProductPage() {
           </div>
         </div>
 
-        {/* Image URL */}
+        {/* Primary Image URL (mapped to images[0]) */}
         <div className="space-y-1">
           <label className="text-xs font-medium text-[#3B2A24]">
-            Image URL
+            Primary image URL
           </label>
           <input
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
             className="w-full rounded-lg border border-[#F3E3EC] px-3 py-2 text-sm outline-none focus:border-[#C74382]"
-            placeholder="https://…"
+            placeholder="https://… (first image in the gallery)"
           />
+          <p className="text-[11px] text-[#7A6058]">
+            This is used as the first image (thumbnail) on product cards.
+          </p>
         </div>
 
         {/* Descriptions */}
@@ -246,7 +267,7 @@ export default function AdminEditProductPage() {
             value={longDescription}
             onChange={(e) => setLongDescription(e.target.value)}
             className="w-full rounded-lg border border-[#F3E3EC] px-3 py-2 text-sm outline-none focus:border-[#C74382] min-h-[100px]"
-            placeholder="More detailed story / info shown on the product page."
+            placeholder="Full story / care instructions / sizing details, shown on the product page."
           />
         </div>
 
@@ -278,35 +299,33 @@ export default function AdminEditProductPage() {
               <input
                 type="checkbox"
                 checked={isBestSeller}
-                onChange={(e) =>
-                  setIsBestSeller(e.target.checked)
-                }
+                onChange={(e) => setIsBestSeller(e.target.checked)}
                 className="rounded border-[#F3E3EC]"
               />
               Best seller
             </label>
-            <div className="space-y-1">
-              <label className="inline-flex items-center gap-2 text-xs text-[#3B2A24]">
-                <input
-                  type="checkbox"
-                  checked={isOnSale}
-                  onChange={(e) => setIsOnSale(e.target.checked)}
-                  className="rounded border-[#F3E3EC]"
-                />
-                On sale
-              </label>
-              {isOnSale && (
-                <input
-                  value={saleBadgeLabel}
-                  onChange={(e) => setSaleBadgeLabel(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-[#F3E3EC] px-3 py-1.5 text-xs outline-none focus:border-[#C74382]"
-                  placeholder='Badge label (ex: "-20%", "Promo")'
-                />
-              )}
-            </div>
+            <label className="inline-flex items-center gap-2 text-xs text-[#3B2A24]">
+              <input
+                type="checkbox"
+                checked={isOnSale}
+                onChange={(e) => setIsOnSale(e.target.checked)}
+                className="rounded border-[#F3E3EC]"
+              />
+              On sale
+            </label>
+            <label className="inline-flex items-center gap-2 text-xs text-[#3B2A24]">
+              <input
+                type="checkbox"
+                checked={isLimited}
+                onChange={(e) => setIsLimited(e.target.checked)}
+                className="rounded border-[#F3E3EC]"
+              />
+              Limited edition
+            </label>
           </div>
           <p className="text-[11px] text-[#7A6058]">
-            These badges control what appears on the homepage sections and
+            These flags control which sections your product appears in (homepage
+            featured / new / best seller / on sale) and which badges show on
             product cards.
           </p>
         </div>

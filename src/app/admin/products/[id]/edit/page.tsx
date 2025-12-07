@@ -3,23 +3,22 @@ import { getProductById } from "@/lib/products";
 import EditProductForm from "./EditProductForm";
 
 type PageParams = {
-  id: string;
+  id: string; // DB id from the URL
 };
 
 export default async function EditProductPage({
   params,
 }: {
-  params: Promise<PageParams>;
+  params: PageParams;
 }) {
-  // ✅ Next 16: params is a Promise
-  const { id } = await params;
+  const { id } = params;
 
-  // id is a string in your DB, so pass directly
+  // ✅ Fetch by ID on the server
   const product = await getProductById(id);
 
   if (!product) {
     return (
-      <div>
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 py-8 sm:py-10">
         <h1 className="text-xl font-semibold text-[#3B2A24]">
           Product not found
         </h1>
@@ -32,7 +31,7 @@ export default async function EditProductPage({
   }
 
   return (
-    <div>
+    <div className="max-w-4xl mx-auto px-3 sm:px-6 py-8 sm:py-10">
       <h1 className="text-xl font-semibold text-[#3B2A24] mb-1">
         Edit product
       </h1>
@@ -40,9 +39,9 @@ export default async function EditProductPage({
         Update details for <strong>{product.name}</strong>.
       </p>
 
-      {/* ✅ Pass the prop name expected by EditProductForm */}
       <EditProductForm product={product} />
     </div>
   );
 }
+
 

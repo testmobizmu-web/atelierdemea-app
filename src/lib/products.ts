@@ -1,29 +1,69 @@
+// src/lib/products.ts
 import { supabase } from "./supabaseClient";
+import { supabaseServer } from "./supabaseServer";
 
+// This is the full shape of your "products" table
 export type Product = {
   id: string;
+  created_at: string | null;
+
   name: string;
   slug: string;
+
   price: number;
+  sale_price: number | null;
+
+  category: string | null;
+  stock: number | null;
+
+  // IMAGE FIELDS
+  // main product image (legacy)
+  image_url: string | null;
+  // new array from Supabase Storage
+  images: string[] | null;
+
+  // TEXT FIELDS
   short_description: string | null;
   long_description: string | null;
-  description?: string | null;
-  category: string | null;
-  color: string | null;
-  variant: string | null;
-  stock: number | null;
-  image_url: string | null;
-  is_featured: boolean;
-  is_new: boolean;
-  is_best_seller: boolean;
-  is_on_sale: boolean;
-  sale_badge_label: string | null;
-  created_at: string;
+
+  // BADGES / FLAGS
+  is_featured: boolean | null;
+  is_new: boolean | null;
+  is_best_seller: boolean | null;
+  is_on_sale: boolean | null;
+  is_limited: boolean | null;
+
+  // EXTRA FIELDS (if you added any, like color / variant)
+  color?: string | null;
+  variant?: string | null;
 };
 
-/**
- * Get all products ordered by newest first.
- */
+// VARIANTS TYPE (for separate variants table)
+export type ProductVariant = {
+  id: string;
+  product_id?: string; // not always present on client side before insert
+  label: string;
+  size?: string | null;
+  color?: string | null;
+  stock?: number | null;
+  price_diff?: number | null;
+};
+
+function normalizeProduct(raw: any): Product {
+  return {
+    ...raw,
+    images: raw.images ?? null,
+    image_url: raw.image_url ?? null,
+    short_description: raw.short_description ?? null,
+    long_description: raw.long_description ?? null,
+    is_featured: raw.is_featured ?? false,
+    is_new: raw.is_new ?? false,
+    is_best_seller: raw.is_best_seller ?? false,
+    is_on_sale: raw.is_on_sale ?? false,
+    is_limited: raw.is_limited ?? false,
+  } as Product;
+}
+
 export async function getAllProducts(): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
@@ -31,33 +71,31 @@ export async function getAllProducts(): Promise<Product[]> {
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("DEBUG getAllProducts – error:", error);
+    console.error("getAllProducts error:", error);
     return [];
   }
 
-  console.log(
-    "DEBUG getAllProducts – count:",
-    (data ?? []).length
-  );
-
-  return (data ?? []).map((p: any) => ({
-    ...p,
-    description: p.description ?? p.short_description ?? null,
-    is_new: p.is_new ?? false,
-    is_best_seller: p.is_best_seller ?? false,
-    is_on_sale: p.is_on_sale ?? false,
-    sale_badge_label: p.sale_badge_label ?? null,
-  })) as Product[];
+  return (data ?? []).map(normalizeProduct);
 }
 
-/**
- * Get single product by slug.
- */
-export async function getProductBySlug(
-  slug: string
-): Promise<Product | null> {
-  console.log("DEBUG getProductBySlug – incoming slug:", slug);
+// ✅ Server-side fetch by ID (used by admin edit page)
+export async function getProductById(id: string): Promise<Product | null> {
+  const { data, error } = await supabaseServer
+    .from("products")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
 
+  if (error) {
+    console.error("getProductById error:", error);
+    return null;
+  }
+  if (!data) return null;
+
+  return normalizeProduct(data);
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | null> {
   const { data, error } = await supabase
     .from("products")
     .select("*")
@@ -65,72 +103,11 @@ export async function getProductBySlug(
     .maybeSingle();
 
   if (error) {
-    console.error("DEBUG getProductBySlug – Supabase error:", error);
+    console.error("getProductBySlug error:", error);
     return null;
   }
 
-  console.log("DEBUG getProductBySlug – data:", data);
-
   if (!data) return null;
 
-  return {
-    ...data,
-    description:
-      (data as any).description ??
-      (data as any).short_description ??
-      null,
-    is_new: data.is_new ?? false,
-    is_best_seller: data.is_best_seller ?? false,
-    is_on_sale: data.is_on_sale ?? false,
-    sale_badge_label: data.sale_badge_label ?? null,
-  } as Product;
-}
-
-// Get a single product by ID (used in admin edit page)
-export async function getProductById(id: string): Promise<Product | null> {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-
-  if (error || !data) return null;
-
-  return {
-    ...data,
-    description: data.description ?? data.short_description ?? null,
-  } as Product;
-}
-
-// Fields that admin is allowed to update
-export type ProductUpdateInput = Partial<
-  Omit<Product, "id" | "created_at">
->;
-
-// Update a product by ID (used by /api/admin/products/[id])
-export async function updateProduct(
-  id: string,
-  updates: ProductUpdateInput
-): Promise<Product | null> {
-  const { data, error } = await supabase
-    .from("products")
-    .update(updates)
-    .eq("id", id)
-    .select()
-    .maybeSingle();
-
-  if (error) {
-    console.error("DEBUG updateProduct – Supabase error:", error);
-    throw error;
-  }
-
-  if (!data) return null;
-
-  return {
-    ...data,
-    description:
-      (data as any).description ??
-      (data as any).short_description ??
-      null,
-  } as Product;
+  return normalizeProduct(data);
 }

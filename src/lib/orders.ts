@@ -4,7 +4,7 @@
 import { supabase } from "./supabaseClient";
 
 export type CartItem = {
-  product_id: string; // your internal product id / slug
+  product_id: string; // internal product id / slug
   name: string;
   price: number;
   quantity: number;
@@ -14,9 +14,15 @@ export type Order = {
   id: string;
   created_at: string;
   user_id?: string | null;
+
   customer_name: string | null;
   customer_phone: string | null;
   customer_address: string | null;
+
+  // These might exist in your SQL, keep them optional
+  city?: string | null;
+  whatsapp_number?: string | null;
+
   notes: string | null;
   status: string;
   payment_method: string | null;
@@ -28,11 +34,15 @@ export type OrderItem = {
   id: string;
   created_at: string;
   order_id: string;
+
   product_id: string | null;
-  name: string;
+  product_name: string; // DB column
+  // convenience alias for UI – you can use item.name if you want
+  name?: string;
+
   unit_price: number;
   quantity: number;
-  line_total?: number;
+  line_total: number;
 };
 
 export type OrderWithItems = Order & {
@@ -154,8 +164,8 @@ export async function createOrderInSupabase(params: {
   // Insert related order_items
   const itemsPayload = items.map((item) => ({
     order_id: order.id,
-    product_id: item.product_id,
-    name: item.name,
+    product_id: item.product_id || null,
+    product_name: item.name, // ✅ match DB column
     unit_price: item.price,
     quantity: item.quantity,
     line_total: item.price * item.quantity,
@@ -173,7 +183,10 @@ export async function createOrderInSupabase(params: {
 
   return {
     ...(order as Order),
-    items: orderItems as OrderItem[],
+    items: (orderItems as any[]).map((it) => ({
+      ...(it as OrderItem),
+      name: it.product_name, // convenience alias
+    })) as OrderItem[],
   };
 }
 
@@ -184,7 +197,21 @@ export async function createOrderInSupabase(params: {
 export async function getRecentOrdersWithItems(limit = 50) {
   const { data, error } = await supabase
     .from("orders")
-    .select("*, order_items(*)")
+    .select(
+      `
+      *,
+      order_items (
+        id,
+        created_at,
+        order_id,
+        product_id,
+        product_name,
+        unit_price,
+        quantity,
+        line_total
+      )
+    `
+    )
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -195,6 +222,9 @@ export async function getRecentOrdersWithItems(limit = 50) {
 
   return (data ?? []).map((row: any) => ({
     ...(row as Order),
-    items: (row.order_items ?? []) as OrderItem[],
+    items: (row.order_items ?? []).map((it: any) => ({
+      ...(it as OrderItem),
+      name: it.product_name, // alias for UI
+    })) as OrderItem[],
   })) as OrderWithItems[];
 }

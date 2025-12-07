@@ -4,6 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useCart } from "@/components/cart/CartContext";
 
@@ -14,10 +15,9 @@ type MainHeaderProps = {
 
 export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { openCart } = useCart(); // ✅ use cart drawer
+  const { openCart } = useCart(); // ✅ from CartContext
 
   const displayName = siteName || "Atelier de Méa";
-  // Fallback to local logo
   const effectiveLogo = logoUrl || "/logo/logo.png";
 
   return (
@@ -88,7 +88,7 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
       {/* ============ MAIN NAV BAR ============ */}
       <div className="border-b border-[#fde7f1] bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
-          {/* ---------- DESKTOP LAYOUT (logo left, nav centered, actions right) ---------- */}
+          {/* ---------- DESKTOP LAYOUT ---------- */}
           <div className="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-4">
             {/* Logo + brand (LEFT) */}
             <Link href="/" className="flex items-center gap-3">
@@ -118,11 +118,10 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
               <Link href="/" className="font-semibold text-[#e11d70]">
                 Home
               </Link>
-              {/* New arrivals has its OWN page */}
               <Link href="/new-arrivals" className="hover:text-[#e11d70]">
                 New Arrivals
               </Link>
-              <Link href="/shop" className="hover:text-[#e11d70]">
+              <Link href="/categories" className="hover:text-[#e11d70]">
                 Categories
               </Link>
               <Link href="/about" className="hover:text-[#e11d70]">
@@ -148,7 +147,7 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
                 Sign up
               </Link>
 
-              {/* 🛒 Cart now opens drawer instead of /cart */}
+              {/* ✅ Cart button opens drawer, not /cart page */}
               <button
                 type="button"
                 onClick={openCart}
@@ -187,7 +186,7 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
 
             {/* Right: cart + hamburger */}
             <div className="flex items-center gap-2">
-              {/* 🛒 Mobile cart also opens drawer */}
+              {/* ✅ Cart button opens drawer */}
               <button
                 type="button"
                 onClick={openCart}
@@ -218,13 +217,10 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
               <Link href="/" className="py-1 hover:text-[#e11d70]">
                 Home
               </Link>
-              <Link
-                href="/new-arrivals"
-                className="py-1 hover:text-[#e11d70]"
-              >
+              <Link href="/new-arrivals" className="py-1 hover:text-[#e11d70]">
                 New Arrivals
               </Link>
-              <Link href="/shop" className="py-1 hover:text-[#e11d70]">
+              <Link href="/categories" className="py-1 hover:text-[#e11d70]">
                 Categories
               </Link>
               <Link href="/about" className="py-1 hover:text-[#e11d70]">
@@ -255,4 +251,3 @@ export function MainHeader({ logoUrl, siteName }: MainHeaderProps) {
     </header>
   );
 }
-

@@ -12,6 +12,16 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Hide horizontal scrollbar for the blog carousel */
+.blog-scroll {
+  -ms-overflow-style: none;  /* IE & Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.blog-scroll::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari */
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;

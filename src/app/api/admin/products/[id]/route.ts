@@ -1,43 +1,35 @@
 // src/app/api/admin/products/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { updateProduct, ProductUpdateInput } from "@/lib/products";
+import { supabaseServer } from "@/lib/supabaseServer";
 
-/**
- * PUT /api/admin/products/[id]
- * Body: partial product fields to update
- */
-export async function PUT(
-  req: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+// NOTE: Next 16 validator expects params to be a Promise<{ id: string }>
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
+// DELETE /api/admin/products/[id]
+export async function DELETE(_req: NextRequest, context: RouteContext) {
+  // ✅ Await the params to get the ID
+  const { id } = await context.params;
+
   try {
-    const { id } = await context.params;
+    const { error } = await supabaseServer
+      .from("products")
+      .delete()
+      .eq("id", id);
 
-    const body = (await req.json()) as ProductUpdateInput;
+    if (error) {
+      console.error("Delete product error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
-    // You can restrict which fields are allowed here if you want:
-    const updates: ProductUpdateInput = {
-      name: body.name,
-      slug: body.slug,
-      price: body.price,
-      short_description: body.short_description,
-      long_description: body.long_description,
-      category: body.category,
-      color: body.color,
-      variant: body.variant,
-      stock: body.stock,
-      image_url: body.image_url,
-      is_featured: body.is_featured,
-    };
-
-    const updated = await updateProduct(id, updates);
-
-    return NextResponse.json({ data: updated });
+    return NextResponse.json({ ok: true }, { status: 200 });
   } catch (err: any) {
-    console.error("Admin update product error:", err);
+    console.error("DELETE /api/admin/products/[id] exception:", err);
     return NextResponse.json(
-      { error: err?.message ?? "Error updating product" },
+      { error: err?.message ?? "Unknown error" },
       { status: 500 }
     );
   }
 }
+

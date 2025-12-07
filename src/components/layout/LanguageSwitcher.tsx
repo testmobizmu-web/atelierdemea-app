@@ -1,4 +1,4 @@
-
+// src/components/layout/LanguageSwitcher.tsx
 "use client";
 
 import {
@@ -8,8 +8,9 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import Image from "next/image";
 
-type Lang = "en" | "fr";
+export type Lang = "en" | "fr";
 
 type LanguageContextType = {
   lang: Lang;
@@ -17,6 +18,7 @@ type LanguageContextType = {
 };
 
 const STORAGE_KEY = "atelierdemea_lang";
+const COOKIE_NAME = "atelier_lang";
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
   undefined
@@ -25,20 +27,52 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
 
-  // Load from localStorage on first mount
+  // 1) Initial detection: cookie → localStorage → browser language
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = window.localStorage.getItem(STORAGE_KEY) as Lang | null;
-    if (saved === "en" || saved === "fr") {
-      setLangState(saved);
+    try {
+      if (typeof window === "undefined") return;
+
+      // cookie first
+      const cookieMatch = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(`${COOKIE_NAME}=`));
+      const cookieLang = cookieMatch?.split("=")[1] as Lang | undefined;
+
+      if (cookieLang === "en" || cookieLang === "fr") {
+        setLangState(cookieLang);
+        return;
+      }
+
+      // localStorage
+      const saved = window.localStorage.getItem(STORAGE_KEY) as Lang | null;
+      if (saved === "en" || saved === "fr") {
+        setLangState(saved);
+        writeCookie(saved);
+        return;
+      }
+
+      // browser language
+      const nav = window.navigator.language.toLowerCase();
+      const auto: Lang = nav.startsWith("fr") ? "fr" : "en";
+      setLangState(auto);
+      writeCookie(auto);
+      window.localStorage.setItem(STORAGE_KEY, auto);
+    } catch {
+      // ignore
     }
   }, []);
+
+  const writeCookie = (value: Lang) => {
+    if (typeof document === "undefined") return;
+    document.cookie = `${COOKIE_NAME}=${value}; path=/; max-age=31536000`;
+  };
 
   const setLang = (value: Lang) => {
     setLangState(value);
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STORAGE_KEY, value);
     }
+    writeCookie(value);
   };
 
   return (
@@ -57,7 +91,7 @@ export function useLanguage() {
 }
 
 /**
- * Small EN/FR toggle pill with flags
+ * EN / FR toggle with PNG flags
  */
 export default function LanguageSwitcher() {
   const { lang, setLang } = useLanguage();
@@ -68,6 +102,7 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="flex items-center gap-1 bg-white/10 rounded-full px-1 py-[2px]">
+      {/* EN */}
       <button
         type="button"
         onClick={() => changeLang("en")}
@@ -75,9 +110,17 @@ export default function LanguageSwitcher() {
           lang === "en" ? "bg-white/80 text-[#e11d70]" : "text-white/80"
         }`}
       >
-        <span className="text-[11px]">🇬🇧</span>
+        <Image
+          src="/flags/en.png"
+          alt="English"
+          width={14}
+          height={14}
+          className="rounded-[2px]"
+        />
         <span>EN</span>
       </button>
+
+      {/* FR */}
       <button
         type="button"
         onClick={() => changeLang("fr")}
@@ -85,9 +128,16 @@ export default function LanguageSwitcher() {
           lang === "fr" ? "bg-white/80 text-[#e11d70]" : "text-white/80"
         }`}
       >
-        <span className="text-[11px]">🇫🇷</span>
+        <Image
+          src="/flags/fr.png"
+          alt="Français"
+          width={14}
+          height={14}
+          className="rounded-[2px]"
+        />
         <span>FR</span>
       </button>
     </div>
   );
 }
+

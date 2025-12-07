@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getAllProducts } from "@/lib/products";
 import ProductCard from "@/components/shop/ProductCard";
 
+
 export const revalidate = 0;
 
 type SearchParams = {

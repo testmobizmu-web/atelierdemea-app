@@ -21,18 +21,30 @@ export default async function NewArrivalsPage() {
   );
 
   let newArrivals = allProducts.filter((p) => {
+    // If no created_at, we skip it
+    if (!p.created_at) return false;
+
     const created = new Date(p.created_at);
+
+    // If created_at is invalid, also skip
+    if (Number.isNaN(created.getTime())) return false;
+
     return created >= thirtyDaysAgo;
   });
 
   // Fallback: if nothing in last 30 days, show latest 24 items
   if (!newArrivals.length) {
     newArrivals = [...allProducts]
-      .sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() -
-          new Date(a.created_at).getTime()
-      )
+      .sort((a, b) => {
+        const timeB = b.created_at
+          ? new Date(b.created_at).getTime()
+          : 0;
+        const timeA = a.created_at
+          ? new Date(a.created_at).getTime()
+          : 0;
+
+        return timeB - timeA;
+      })
       .slice(0, 24);
   }
 
@@ -74,4 +86,5 @@ export default async function NewArrivalsPage() {
     </main>
   );
 }
+
 

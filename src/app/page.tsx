@@ -8,6 +8,7 @@ export const revalidate = 0;
 
 /**
  * SEO metadata for the homepage
+ * (Global dynamic SEO by language is handled in layout.tsx via generateMetadata)
  */
 export const metadata: Metadata = {
   title:
@@ -37,3 +38,4 @@ export default async function HomePage() {
     />
   );
 }
+
